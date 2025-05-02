@@ -102,6 +102,7 @@ class AuthService:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
         
         access_token_expires = timedelta(minutes=utils.ACCESS_TOKEN_EXPIRE_MINUTES)
+        refresh_token_expires = timedelta(days=utils.REFRESH_TOKEN_EXPIRE_DAYS)
         access_token = utils.create_access_token(
             data={
                 'sub': user.username,
@@ -111,7 +112,15 @@ class AuthService:
             expires_delta=access_token_expires
         )
         
-        return {"access_token": access_token, "token_type": "bearer"}
+        refresh_token = utils.create_access_token(
+            data={
+                'sub': user.username,
+                'id': user.id,
+                'email': user.email,
+            },
+            expires_delta=refresh_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
         
     def logout(self, db: SessionDep, token: str):
         try:
