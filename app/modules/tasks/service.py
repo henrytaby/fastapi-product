@@ -4,7 +4,7 @@ from .repository import TaskRepository
 from app.core.exceptions import NotFoundException
 
 class TaskService:
-    no_task:str = "Task doesn't exits"
+    no_task:str = "Task not found"
     
     def __init__(self, repository: TaskRepository):
         self.repository = repository

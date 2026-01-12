@@ -30,5 +30,4 @@ class ProductCategoryRead(BaseModel):
     id: int = Field(description="The primary key")
     name: str = Field(description="The name of the product category")
     description: Optional[str] = Field(None, description="The description of the product category")
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}

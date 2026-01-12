@@ -101,9 +101,30 @@ SECRET_KEY=tu_clave_secreta_generada
 ...
 ```
 
-### 6. Inicializar Datos (Seeds)
+### 6. Migraciones de Base de Datos (Alembic)
+El proyecto utiliza **Alembic** para gestionar cambios en el esquema de la base de datos de forma segura.
+
+Generar una nueva migración (tras modificar un modelo):
+```bash
+alembic revision --autogenerate -m "Descripción del cambio"
+```
+
+Aplicar cambios pendientes a la BD:
+```bash
+alembic upgrade head
+```
+
+### 7. Inicializar Datos (Seeds)
 ```bash
 PYTHONPATH=. python3 seeds/seed_create_app.py
+```
+
+### 8. Testing Automatizado
+El proyecto incluye tests de integración usando `pytest`. Las pruebas utilizan una base de datos en memoria (SQLite), por lo que no afectan los datos reales.
+
+Ejecutar tests:
+```bash
+pytest
 ```
 
 ## Ejecución

@@ -29,5 +29,4 @@ class ProductBrandRead(BaseModel):
     id: int = Field(description="The primary key")
     name: str = Field(description="The name of the product brand")
     description: Optional[str] = Field(None, description="The description of the product brand")
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}

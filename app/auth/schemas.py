@@ -7,8 +7,7 @@ class UserCreate(SQLModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     password: str
-    class Config:
-        extra = "forbid"
+    model_config = {"extra": "forbid"}
 
 class User(SQLModel):
     id: int
@@ -18,8 +17,7 @@ class User(SQLModel):
     last_name: Optional[str] = Field(default=None)
     is_verified: bool = Field(default=False)
     password_hash: str
-    class Config:
-        extra = "forbid"
+    model_config = {"extra": "forbid"}
 
 class UserResponse(SQLModel):
     id: int
@@ -28,8 +26,7 @@ class UserResponse(SQLModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     is_verified: bool = Field(default=False)
-    class Config:
-        extra = "forbid"
+    model_config = {"extra": "forbid"}
         
 class Token(SQLModel):
     access_token: str

@@ -41,5 +41,4 @@ class ProductRead(ProductBase):
     created_at: Optional[datetime] = Field(None, description="The timestamp when the data was created")
     category: Optional[ProductCategoryRead] = None  # Relación con la categoría
     brand: Optional[ProductBrandRead] = None  # Relación con la categoría
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}

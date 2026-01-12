@@ -53,7 +53,7 @@ app.add_middleware(
 #version_prefix = f"/api/{version}"
 version_prefix = "/api"
 # Incluir el router principal
-app.include_router(api_router)
+app.include_router(api_router, prefix=version_prefix)
 
 # Exception Handlers
 from app.core.exceptions import NotFoundException, BadRequestException, InternalServerErrorException

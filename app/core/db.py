@@ -14,8 +14,11 @@ https://fastapi.tiangolo.com/tutorial/sql-databases/#run-the-app
 '''
 engine = create_engine(settings.DATABASE_URL, echo = False)
 
-def create_db_and_tables(app: FastAPI):
-    SQLModel.metadata.create_all(engine)
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def create_db_and_tables(app: FastAPI):
+    # SQLModel.metadata.create_all(engine)
     #print(f"--[>] Server is starting ...")
     yield
     #print(f"--[x] Server has been stopped")
