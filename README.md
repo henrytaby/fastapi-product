@@ -197,7 +197,7 @@ if not user:
 
 ### 11. Documentación para Desarrolladores
 ¿Quieres crear un nuevo módulo? Sigue nuestra receta paso a paso:
-👉 **[Lee el Manual del Desarrollador](docs/MANUAL_DESARROLLADOR.md)**
+👉 **[Lee el Manual del Desarrollador](docs/DEVELOPER_GUIDE.md)**
 
 ## Ejecución
 
