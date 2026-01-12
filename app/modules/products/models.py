@@ -12,6 +12,7 @@ class Product(BaseModel, table=True):
     '''
     Product model that represents a product in the database.
     '''
+    __tablename__ = "product"
     title: str = Field(default=None)
     price: int = 0
     description: Optional[str] = Field(default=None)

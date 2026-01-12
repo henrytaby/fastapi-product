@@ -1,25 +1,24 @@
 from fastapi import HTTPException, status
-from sqlmodel import select, Session
-
 from .models import ProductCategory
 from .schemas import ProductCategoryCreate, ProductCategoryUpdate
-
+from .repository import ProductCategoryRepository
 
 class ProductCategoryService:
     no_task:str = "Product doesn't exits"
+    
+    def __init__(self, repository: ProductCategoryRepository):
+        self.repository = repository
+
     # CREATE
     # ----------------------
-    def create_product_category(self, item_data: ProductCategoryCreate, session: Session):
+    def create_product_category(self, item_data: ProductCategoryCreate):
         item_db = ProductCategory.model_validate(item_data.model_dump())
-        session.add(item_db)
-        session.commit()
-        session.refresh(item_db)
-        return item_db
+        return self.repository.create(item_db)
 
     # GET ONE
     # ----------------------
-    def get_product_category(self, item_id: int, session: Session):
-        item_db = session.get(ProductCategory, item_id)
+    def get_product_category(self, item_id: int):
+        item_db = self.repository.get_by_id(item_id)
         if not item_db:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
@@ -28,33 +27,27 @@ class ProductCategoryService:
 
     # UPDATE
     # ----------------------
-    def update_product_category(self, item_id: int, item_data: ProductCategoryUpdate, session: Session):
-        item_db = session.get(ProductCategory, item_id)
-        if not item_db:
-            raise HTTPException(
+    def update_product_category(self, item_id: int, item_data: ProductCategoryUpdate):
+        item_data_dict = item_data.model_dump(exclude_unset=True)
+        updated_item = self.repository.update(item_id, item_data_dict)
+        
+        if not updated_item:
+             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
             )
-        item_data_dict = item_data.model_dump(exclude_unset=True)
-        item_db.sqlmodel_update(item_data_dict)
-        session.add(item_db)
-        session.commit()
-        session.refresh(item_db)
-        return item_db
+        return updated_item
 
     # GET ALL PLANS
     # ----------------------
-    def get_product_categories(self, session: Session):
-        return session.exec(select(ProductCategory)).all()
+    def get_product_categories(self, offset: int = 0, limit: int = 100):
+        return self.repository.get_all(offset, limit)
 
     # DELETE
     # ----------------------
-    def delete_product_category(self, item_id: int, session: Session):
-        item_db = session.get(ProductCategory, item_id)
-        if not item_db:
+    def delete_product_category(self, item_id: int):
+        success = self.repository.delete(item_id)
+        if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
             )
-        session.delete(item_db)
-        session.commit()
-        
         return {"detail": "ok"}

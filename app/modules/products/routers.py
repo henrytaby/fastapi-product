@@ -1,12 +1,16 @@
-
-from fastapi import APIRouter, status
-from app.core.db import SessionDep
+from fastapi import APIRouter, status, Depends
+from sqlmodel import Session
+from app.core.db import get_session
 from .models import Product
 from .schemas import ProductCreate, ProductRead, ProductUpdate
 from .service import ProductService
+from .repository import ProductRepository
 
 router = APIRouter()
-service = ProductService()
+
+def get_service(session: Session = Depends(get_session)):
+    repository = ProductRepository(session)
+    return ProductService(repository)
 
 
 # CREATE - Crear una nueva tarea
@@ -14,17 +18,18 @@ service = ProductService()
 @router.post("/", response_model=Product, status_code=status.HTTP_201_CREATED)
 async def create_product(
     product_data: ProductCreate,
-    session: SessionDep
+    service: ProductService = Depends(get_service)
     ):
-    return service.create_product(product_data, session)
+    return service.create_product(product_data)
+
 # GET ONE - Obtener una tarea por ID
 # ----------------------
 @router.get("/{product_id}", response_model=ProductRead)
 async def get_product(
     product_id: int,
-    session: SessionDep
+    service: ProductService = Depends(get_service)
 ):
-    return service.get_product(product_id,session)
+    return service.get_product(product_id)
 
 # UPDATE - Actualizar una tarea existente
 # ----------------------
@@ -32,24 +37,24 @@ async def get_product(
 async def update_product(
     product_id: int,
     product_data: ProductUpdate,
-    session: SessionDep
+    service: ProductService = Depends(get_service)
 ):
     
-    return service.update_product(product_id, product_data, session)
+    return service.update_product(product_id, product_data)
 
 # GET ALL TASK - Obtener todas las tareas
 # ----------------------
 @router.get("/", response_model=list[ProductRead])
 async def get_products(
-    session: SessionDep
+    service: ProductService = Depends(get_service)
 ):
-    return service.get_products(session)
+    return service.get_products()
 
 # DELETE - Eliminar una tarea
 # ----------------------
 @router.delete("/{product_id}")
 async def delete_product(
     product_id: int,
-    session: SessionDep,
+    service: ProductService = Depends(get_service)
 ):
-    return service.delete_product(product_id, session)
+    return service.delete_product(product_id)

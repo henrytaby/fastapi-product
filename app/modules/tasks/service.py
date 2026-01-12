@@ -1,23 +1,24 @@
 from fastapi import HTTPException, status
-from sqlmodel import select, Session
 from .models import Task
 from .schemas import TaskCreate, TaskUpdate
+from .repository import TaskRepository
 
 class TaskService:
     no_task:str = "Task doesn't exits"
+    
+    def __init__(self, repository: TaskRepository):
+        self.repository = repository
+
     # CREATE
     # ----------------------
-    def create_task(self, item_data: TaskCreate, session: Session):
+    def create_task(self, item_data: TaskCreate):
         task_db = Task.model_validate(item_data.model_dump())
-        session.add(task_db)
-        session.commit()
-        session.refresh(task_db)
-        return task_db
+        return self.repository.create(task_db)
 
     # GET ONE
     # ----------------------
-    def get_task(self, item_id: int, session: Session):
-        task_db = session.get(Task, item_id)
+    def get_task(self, item_id: int):
+        task_db = self.repository.get_by_id(item_id)
         if not task_db:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
@@ -26,32 +27,34 @@ class TaskService:
 
     # UPDATE
     # ----------------------
-    def update_task(self, item_id: int, item_data: TaskUpdate, session: Session):
-        task_db = session.get(Task, item_id)
-        if not task_db:
-            raise HTTPException(
+    def update_task(self, item_id: int, item_data: TaskUpdate):
+        # We need to manually check existence for 404 because BaseRepository.update returns None if not found
+        # Alternatively, we could let repository handle it or check here.
+        # Let's keep existing logic: check exists, then update.
+        
+        # However, BaseRepository.update already does a fetch. 
+        # To keep it atomic and simple, let's try to update.
+        
+        item_data_dict = item_data.model_dump(exclude_unset=True)
+        updated_task = self.repository.update(item_id, item_data_dict)
+        
+        if not updated_task:
+             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
             )
-        item_data_dict = item_data.model_dump(exclude_unset=True)
-        task_db.sqlmodel_update(item_data_dict)
-        session.add(task_db)
-        session.commit()
-        session.refresh(task_db)
-        return task_db
+        return updated_task
 
     # GET ALL PLANS
     # ----------------------
-    def get_tasks(self, session: Session):
-        return session.exec(select(Task)).all()
+    def get_tasks(self, offset: int = 0, limit: int = 100):
+        return self.repository.get_all(offset, limit)
         
     # DELETE
     # ----------------------
-    def delete_task(self, item_id: int, session: Session):
-        task_db = session.get(Task, item_id)
-        if not task_db:
+    def delete_task(self, item_id: int):
+        success = self.repository.delete(item_id)
+        if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
             )
-        session.delete(task_db)
-        session.commit()
         return {"detail": "ok"}

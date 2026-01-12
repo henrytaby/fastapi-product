@@ -1,39 +1,29 @@
 from fastapi import HTTPException, status
-from sqlmodel import select, Session
-from sqlalchemy.orm import selectinload
 from .models import Product
 from .schemas import ProductCreate, ProductUpdate
-from ..catalog.products_category.models import ProductCategory
-from ..catalog.products_brand.models import ProductBrand
+from .repository import ProductRepository
 
 class ProductService:
-    no_task:str = "Product doesn't exits"
+    no_product:str = "Product doesn't exits"
+    
+    def __init__(self, repository: ProductRepository):
+        self.repository = repository
+
     # CREATE
     # ----------------------
-    def create_product(self, item_data: ProductCreate, session: Session):
+    def create_product(self, item_data: ProductCreate):
 
+        # Validate Category
+        if not self.repository.check_category_exists(item_data.category_id):
+             raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Category Id:{item_data.category_id} doesn't exist"
+            )
+            
         product_db = Product.model_validate(item_data.model_dump())
         
-        category_data = session.get(ProductCategory, product_db.category_id)
-        if not category_data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Category Id:{product_db.category_id} doesn't exist"
-            )
-        '''
-        brand_data = session.get(ProductBrand, product_db.brand_id)
-        if not brand_data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Brand Id:{product_db.category_id} doesn't exist"
-            )
-        '''
-        
         try:
-            session.add(product_db)
-            session.commit()
-            session.refresh(product_db)
-            return product_db
+            return self.repository.create(product_db)
         except Exception:
-            session.rollback
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Internal Server error, create Product",
@@ -41,14 +31,8 @@ class ProductService:
 
     # GET ONE
     # ----------------------
-    def get_product(self, item_id: int, session: Session):
-        statement = (
-            select(Product)
-            .where(Product.id == item_id)
-            .options(selectinload(Product.category))  # Cargar la categoría
-            .options(selectinload(Product.brand)) 
-        )
-        product_db = session.exec(statement).first()
+    def get_product(self, item_id: int):
+        product_db = self.repository.get_by_id_with_relations(item_id)
 
         if not product_db:
             raise HTTPException(
@@ -58,40 +42,27 @@ class ProductService:
 
     # UPDATE
     # ----------------------
-    def update_product(self, item_id: int, item_data: ProductUpdate, session: Session):
-        product_db = session.get(Product, item_id)
-        if not product_db:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
-            )
+    def update_product(self, item_id: int, item_data: ProductUpdate):
         item_data_dict = item_data.model_dump(exclude_unset=True)
-        product_db.sqlmodel_update(item_data_dict)
-        session.add(product_db)
-        session.commit()
-        session.refresh(product_db)
-        return product_db
+        updated_product = self.repository.update(item_id, item_data_dict)
+        
+        if not updated_product:
+             raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_product
+            )
+        return updated_product
 
     # GET ALL PLANS
     # ----------------------
-    def get_products(self, session: Session):
-        
-        statement = (
-            select(Product)
-            .options(selectinload(Product.category))  # Cargar la categoría
-            .options(selectinload(Product.brand)) 
-        )
-        
-        return session.exec(statement).all()
+    def get_products(self, offset: int = 0, limit: int = 100):
+        return self.repository.get_all_with_relations(offset, limit)
 
     # DELETE
     # ----------------------
-    def delete_product(self, item_id: int, session: Session):
-        product_db = session.get(Product, item_id)
-        if not product_db:
+    def delete_product(self, item_id: int):
+        success = self.repository.delete(item_id)
+        if not success:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
+                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_product
             )
-        session.delete(product_db)
-        session.commit()
-        
         return {"detail": "ok"}
