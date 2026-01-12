@@ -58,6 +58,14 @@ version_prefix = "/api"
 # Incluir el router principal
 app.include_router(api_router)
 
+# Exception Handlers
+from app.core.exceptions import NotFoundException, BadRequestException, InternalServerErrorException
+from app.core.handlers import not_found_exception_handler, bad_request_exception_handler, internal_server_error_handler
+
+app.add_exception_handler(NotFoundException, not_found_exception_handler)
+app.add_exception_handler(BadRequestException, bad_request_exception_handler)
+app.add_exception_handler(InternalServerErrorException, internal_server_error_handler)
+
 
 @app.get("/")
 async def read_items():

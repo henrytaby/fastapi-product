@@ -1,7 +1,7 @@
-from fastapi import HTTPException, status
 from .models import Task
 from .schemas import TaskCreate, TaskUpdate
 from .repository import TaskRepository
+from app.core.exceptions import NotFoundException
 
 class TaskService:
     no_task:str = "Task doesn't exits"
@@ -20,28 +20,17 @@ class TaskService:
     def get_task(self, item_id: int):
         task_db = self.repository.get_by_id(item_id)
         if not task_db:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
-            )
+            raise NotFoundException(detail=self.no_task)
         return task_db
 
     # UPDATE
     # ----------------------
     def update_task(self, item_id: int, item_data: TaskUpdate):
-        # We need to manually check existence for 404 because BaseRepository.update returns None if not found
-        # Alternatively, we could let repository handle it or check here.
-        # Let's keep existing logic: check exists, then update.
-        
-        # However, BaseRepository.update already does a fetch. 
-        # To keep it atomic and simple, let's try to update.
-        
         item_data_dict = item_data.model_dump(exclude_unset=True)
         updated_task = self.repository.update(item_id, item_data_dict)
         
         if not updated_task:
-             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
-            )
+             raise NotFoundException(detail=self.no_task)
         return updated_task
 
     # GET ALL PLANS
@@ -54,7 +43,5 @@ class TaskService:
     def delete_task(self, item_id: int):
         success = self.repository.delete(item_id)
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
-            )
+            raise NotFoundException(detail=self.no_task)
         return {"detail": "ok"}

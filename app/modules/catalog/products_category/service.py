@@ -1,7 +1,7 @@
-from fastapi import HTTPException, status
 from .models import ProductCategory
 from .schemas import ProductCategoryCreate, ProductCategoryUpdate
 from .repository import ProductCategoryRepository
+from app.core.exceptions import NotFoundException
 
 class ProductCategoryService:
     no_task:str = "Product doesn't exits"
@@ -20,9 +20,7 @@ class ProductCategoryService:
     def get_product_category(self, item_id: int):
         item_db = self.repository.get_by_id(item_id)
         if not item_db:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
-            )
+            raise NotFoundException(detail=self.no_task)
         return item_db
 
     # UPDATE
@@ -32,9 +30,7 @@ class ProductCategoryService:
         updated_item = self.repository.update(item_id, item_data_dict)
         
         if not updated_item:
-             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
-            )
+             raise NotFoundException(detail=self.no_task)
         return updated_item
 
     # GET ALL PLANS
@@ -47,7 +43,5 @@ class ProductCategoryService:
     def delete_product_category(self, item_id: int):
         success = self.repository.delete(item_id)
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=self.no_task
-            )
+            raise NotFoundException(detail=self.no_task)
         return {"detail": "ok"}
