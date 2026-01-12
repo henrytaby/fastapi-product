@@ -10,6 +10,7 @@ Este proyecto es una API modular diseñada con buenas prácticas de ingeniería 
 *   **Productos**: Gestión de inventario con relaciones a categorías y marcas.
 *   **Clientes**: Administración de usuarios/clientes.
 *   **Catálogo**: Gestión centralizada de Categorías y Marcas.
+*   **Seguridad**: Autenticación JWT robusta con **Rotación de Tokens**, Logout seguro (Blacklist) y Hashing de contraseñas.
 
 ## Arquitectura
 
