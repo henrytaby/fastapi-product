@@ -136,9 +136,63 @@ ruff check .
 ruff format .
 ```
 
-Chequeo de Tipos (MyPy):
+### 10. Logging Estructurado
+El sistema utiliza `structlog` para generar logs en formato JSON (en producción) o texto coloreado (en desarrollo), incluyendo un `request_id` único para trazabilidad.
+
 ```bash
-mypy .
+# Los logs se mostrarán en la salida estándar (stdout)
+fastapi dev app/main.py
+```
+
+## Guía de Uso para Desarrolladores
+
+### 1. Uso del Logger
+En cualquier archivo (Router, Service, Repository):
+```python
+import structlog
+logger = structlog.get_logger()
+
+def mi_funcion():
+    # Log simple
+    logger.info("iniciando_proceso")
+    
+    # Log con contexto (recomendado)
+    logger.info("usuario_creado", user_id=123, email="test@example.com")
+    
+    try:
+        ...
+    except Exception as e:
+        # Log de error con traza completa
+        logger.error("error_critico", error=str(e), exc_info=True)
+```
+
+### 2. Uso de Repositorios
+La inyección de dependencias se maneja en el **Router**, el **Service** recibe el repositorio ya instanciado.
+```python
+# Service
+class TaskService:
+    def __init__(self, repository: TaskRepository):
+        self.repository = repository
+
+    def get(self, id: int):
+        return self.repository.get_by_id(id)
+
+# Router
+@router.post("/")
+def create_task(
+    item: TaskCreate, 
+    service: TaskService = Depends(get_service) # Inyecta Repo automáticamente
+):
+    service.create(item)
+```
+
+### 3. Lanzar Excepciones
+Nunca uses `HTTPException` directamente en el Service. Usa las excepciones de dominio:
+```python
+from app.core.exceptions import NotFoundException, BadRequestException
+
+if not user:
+    raise NotFoundException(detail="Usuario no encontrado")
 ```
 
 ## Ejecución
