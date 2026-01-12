@@ -121,7 +121,27 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
             )
 
+        # Check if the refresh token is already revoked
+        query_revoked = select(UserRevokedToken).where(
+            UserRevokedToken.token == refresh_token
+        )
+        revoked_token = db.exec(query_revoked).first()
+        if revoked_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been revoked",
+            )
+
+        # Revoke the old refresh token (Rotate)
+        # Using 0 as user_id temporarily, or accurate user_id if we want
+        # stricter validation earlier used_id for the record.
+        new_revoked_token = UserRevokedToken(token=refresh_token, user_id=user.id)
+        db.add(new_revoked_token)
+        db.commit()
+
         access_token_expires = timedelta(minutes=utils.ACCESS_TOKEN_EXPIRE_MINUTES)
+        refresh_token_expires = timedelta(days=utils.REFRESH_TOKEN_EXPIRE_DAYS)
+
         access_token = utils.create_access_token(
             data={
                 "sub": user.username,
@@ -131,9 +151,22 @@ class AuthService:
             expires_delta=access_token_expires,
         )
 
-        return {"access_token": access_token, "token_type": "bearer"}
+        new_refresh_token = utils.create_access_token(
+            data={
+                "sub": user.username,
+                "id": user.id,
+                "email": user.email,
+            },
+            expires_delta=refresh_token_expires,
+        )
 
-    def logout(self, db: SessionDep, token: str):
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "refresh_token": new_refresh_token,
+        }
+
+    def logout(self, db: SessionDep, token: str, refresh_token: str | None = None):
         try:
             payload = utils.decode_token(token)
             user_id: int = payload.get("id")
@@ -146,12 +179,22 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             ) from None
 
-        # Check if the token is already revoked
+        # Check if the access token is already revoked
         query = select(UserRevokedToken).where(UserRevokedToken.token == token)
         revoked_token = db.exec(query).first()
         if not revoked_token:
             revoked_token = UserRevokedToken(token=token, user_id=user_id)
             db.add(revoked_token)
+
+        # Revoke Refresh Token if provided
+        if refresh_token:
+            query_rf = select(UserRevokedToken).where(
+                UserRevokedToken.token == refresh_token
+            )
+            revoked_rf = db.exec(query_rf).first()
+            if not revoked_rf:
+                revoked_rf = UserRevokedToken(token=refresh_token, user_id=user_id)
+                db.add(revoked_rf)
 
         # Update the log with logout time
         log_query = select(UserLogLogin).where(UserLogLogin.token == token)

@@ -39,6 +39,11 @@ async def refresh_access_token(db: SessionDep, refresh_token: str):
 
 
 @router.post("/logout", response_model=dict)
-async def logout(db: SessionDep, token: str = Depends(utils.oauth2_scheme)):
-    service.logout(db, token)
+async def logout(
+    db: SessionDep,
+    token: str = Depends(utils.oauth2_scheme),
+    logout_data: schemas.LogoutRequest | None = None,
+):
+    refresh_token = logout_data.refresh_token if logout_data else None
+    service.logout(db, token, refresh_token)
     return {"msg": "Successfully logged out"}

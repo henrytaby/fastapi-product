@@ -41,3 +41,7 @@ class Token(SQLModel):
 
 class TokenData(SQLModel):
     username: Optional[str] = None
+
+
+class LogoutRequest(SQLModel):
+    refresh_token: str
