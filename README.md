@@ -197,9 +197,11 @@ if not user:
 ```
 
 ### 11. Documentación para Desarrolladores
-¿Quieres crear un nuevo módulo? Sigue nuestra receta paso a paso:
-👉 **[Lee el Manual del Desarrollador](docs/DEVELOPER_GUIDE.md)**
-👉 **[Lee la Guía de Autenticación y Seguridad](docs/AUTHENTICATION_GUIDE.md)**
+¿Quieres profundizar en el desarrollo? Consulta nuestras guías detalladas:
+
+1.  **[Manual del Desarrollador (Creación de Módulos)](docs/DEVELOPER_GUIDE.md)**
+2.  **[Guía de Autenticación y Seguridad](docs/AUTHENTICATION_GUIDE.md)**
+3.  **[Guía de Testing Automatizado](docs/TESTING_GUIDE.md)**
 
 ## Ejecución
 
