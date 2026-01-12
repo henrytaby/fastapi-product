@@ -127,6 +127,20 @@ Ejecutar tests:
 pytest
 ```
 
+### 9. Calidad de Código
+El proyecto utiliza herramientas estándar para asegurar la consistencia y calidad.
+
+Linting y Formateo (Ruff):
+```bash
+ruff check .
+ruff format .
+```
+
+Chequeo de Tipos (MyPy):
+```bash
+mypy .
+```
+
 ## Ejecución
 
 Modo desarrollo (con hot-reload):
