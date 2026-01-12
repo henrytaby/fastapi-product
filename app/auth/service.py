@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 from sqlmodel import select
@@ -36,9 +36,12 @@ class AuthService:
     def login_for_access_token(
         self,
         db: SessionDep,
-        form_data: OAuth2PasswordRequestForm = Depends(),
-        request: Request = None,
+        form_data: OAuth2PasswordRequestForm,
+        request: Request,
     ):
+        ip_address = request.client.host if request and request.client else "unknown"
+        user_agent = request.headers.get("user-agent") if request else "unknown"
+
         user = utils.authenticate_user(db, form_data.username, form_data.password)
         if not user:
             # Log the failed login attempt
@@ -48,8 +51,8 @@ class AuthService:
                 password=form_data.password,
                 token=None,
                 token_expiration=None,
-                ip_address=request.client.host,
-                host_info=request.headers.get("user-agent"),
+                ip_address=ip_address,
+                host_info=user_agent,
                 is_successful=False,
             )
             db.add(log)
@@ -86,8 +89,8 @@ class AuthService:
             username=user.username,
             token=access_token,
             token_expiration=get_current_time() + access_token_expires,
-            ip_address=request.client.host,
-            host_info=request.headers.get("user-agent"),
+            ip_address=ip_address,
+            host_info=user_agent,
             is_successful=True,
         )
         db.add(log)
@@ -151,8 +154,8 @@ class AuthService:
             db.add(revoked_token)
 
         # Update the log with logout time
-        query = select(UserLogLogin).where(UserLogLogin.token == token)
-        log = db.exec(query).first()
+        log_query = select(UserLogLogin).where(UserLogLogin.token == token)
+        log = db.exec(log_query).first()
         if log:
             log.logged_out_at = get_current_time()
             db.add(log)

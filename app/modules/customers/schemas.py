@@ -7,11 +7,11 @@ from .models import Customer
 
 
 class CustomerBase(BaseModel):
-    name: str = Field(default=None)
+    name: str | None = Field(default=None)
     last_name: str | None = Field(default=None)
     description: str | None = Field(default=None)
-    email: EmailStr = Field(default=None)
-    age: int = Field(default=None)
+    email: EmailStr | None = Field(default=None)
+    age: int | None = Field(default=None)
 
 
 # Modelo para crear una nueva tarea (hereda de TaskBase)

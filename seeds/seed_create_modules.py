@@ -36,6 +36,9 @@ def create_modules(session: Session):
         select(ModuleGroup).where(ModuleGroup.name == "Configuración")
     ).first()
 
+    assert group_1 is not None, "ModuleGroup 'Usuarios' not found"
+    assert group_2 is not None, "ModuleGroup 'Configuración' not found"
+
     modules = [
         {
             "name": "Gestión de usuarios",

@@ -57,6 +57,10 @@ starlette==0.45.3
 structlog==25.5.0
 tomli==2.4.0
 typer==0.15.1
+types-passlib==1.7.7.20250602
+types-pyasn1==0.6.0.20250914
+types-python-jose==3.5.0.20250531
+types-pytz==2025.2.0.20251108
 typing_extensions==4.12.2
 uvicorn==0.34.0
 uvloop==0.21.0

@@ -83,9 +83,9 @@ version_prefix = "/api"
 app.include_router(api_router, prefix=version_prefix)
 
 
-app.add_exception_handler(NotFoundException, not_found_exception_handler)
-app.add_exception_handler(BadRequestException, bad_request_exception_handler)
-app.add_exception_handler(InternalServerErrorException, internal_server_error_handler)
+app.add_exception_handler(NotFoundException, not_found_exception_handler)  # type: ignore
+app.add_exception_handler(BadRequestException, bad_request_exception_handler)  # type: ignore
+app.add_exception_handler(InternalServerErrorException, internal_server_error_handler)  # type: ignore
 
 
 @app.get("/")

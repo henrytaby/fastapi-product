@@ -15,10 +15,11 @@ class ProductService:
     # ----------------------
     def create_product(self, item_data: ProductCreate):
         # Validate Category
-        if not self.repository.check_category_exists(item_data.category_id):
-            raise NotFoundException(
-                detail=f"Category Id:{item_data.category_id} doesn't exist"
-            )
+        if item_data.category_id:
+            if not self.repository.check_category_exists(item_data.category_id):
+                raise NotFoundException(
+                    detail=f"Category Id:{item_data.category_id} doesn't exist"
+                )
 
         product_db = Product.model_validate(item_data.model_dump())
 

@@ -8,7 +8,9 @@ class ProductCategoryBase(BaseModel):
     Base schema for a product category.
     """
 
-    name: str = Field(default=None, description="The name of the product category")
+    name: str | None = Field(
+        default=None, description="The name of the product category"
+    )
     description: Optional[str] = Field(
         default=None, description="The description of the product category"
     )

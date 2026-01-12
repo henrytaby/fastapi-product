@@ -1,4 +1,4 @@
-from typing import Generic, List, Optional, Type, TypeVar
+from typing import Generic, Optional, Sequence, Type, TypeVar
 
 from sqlmodel import Session, SQLModel, select
 
@@ -10,7 +10,7 @@ class BaseRepository(Generic[ModelType]):
         self.session = session
         self.model = model
 
-    def get_all(self, offset: int = 0, limit: int = 100) -> List[ModelType]:
+    def get_all(self, offset: int = 0, limit: int = 100) -> Sequence[ModelType]:
         statement = select(self.model).offset(offset).limit(limit)
         return self.session.exec(statement).all()
 

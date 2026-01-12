@@ -8,7 +8,7 @@ class ProductBrandBase(BaseModel):
     Base schema for a Product Brand.
     """
 
-    name: str = Field(default=None, description="The name of the product brand")
+    name: str | None = Field(default=None, description="The name of the product brand")
     description: Optional[str] = Field(
         default=None, description="The description of the product brand"
     )

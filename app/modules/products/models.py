@@ -20,7 +20,6 @@ class Product(BaseModel, table=True):
     title: str = Field(default=None)
     price: int = 0
     description: Optional[str] = Field(default=None)
-    category: Optional[str] = Field(default=None)
     image: str = Field(default=None)
 
     category_id: Optional[int] = Field(default=None, foreign_key="product_category.id")

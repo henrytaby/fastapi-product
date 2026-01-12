@@ -22,8 +22,8 @@ def create_user(user: schemas.UserCreate, db: SessionDep):
 @router.post("/token", response_model=schemas.Token)
 async def login_for_access_token(
     db: SessionDep,
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
-    request: Request = None,
 ):
     return service.login_for_access_token(db, form_data, request)
 

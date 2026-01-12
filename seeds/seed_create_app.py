@@ -45,6 +45,9 @@ def create_modules(session: Session):
         select(ModuleGroup).where(ModuleGroup.name == "Configuración")
     ).first()
 
+    assert group_1 is not None, "Group Usuarios not found"
+    assert group_2 is not None, "Group Configuración not found"
+
     modules = [
         {
             "name": "Gestión de usuarios",
@@ -128,6 +131,12 @@ def create_role_modules(session: Session):
     ).first()
     module3 = session.exec(select(Module).where(Module.name == "Módulos")).first()
 
+    assert admin_role is not None
+    assert manager_role is not None
+    assert module1 is not None
+    assert module2 is not None
+    assert module3 is not None
+
     role_modules = [
         {
             "role_id": admin_role.id,
@@ -196,6 +205,9 @@ def create_users(session: Session):
     manager_role = session.exec(
         select(Role).where(Role.name == "Manager Config")
     ).first()
+
+    assert admin_role is not None
+    assert manager_role is not None
 
     admin_user = User(
         username="admin",

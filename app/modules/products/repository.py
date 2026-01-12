@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional, Sequence
 
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
@@ -15,11 +15,11 @@ class ProductRepository(BaseRepository[Product]):
 
     def get_all_with_relations(
         self, offset: int = 0, limit: int = 100
-    ) -> List[Product]:
+    ) -> Sequence[Product]:
         statement = (
             select(Product)
-            .options(selectinload(Product.category))
-            .options(selectinload(Product.brand))
+            .options(selectinload(Product.category))  # type: ignore
+            .options(selectinload(Product.brand))  # type: ignore
             .offset(offset)
             .limit(limit)
         )
@@ -29,8 +29,8 @@ class ProductRepository(BaseRepository[Product]):
         statement = (
             select(Product)
             .where(Product.id == id)
-            .options(selectinload(Product.category))
-            .options(selectinload(Product.brand))
+            .options(selectinload(Product.category))  # type: ignore
+            .options(selectinload(Product.brand))  # type: ignore
         )
         return self.session.exec(statement).first()
 

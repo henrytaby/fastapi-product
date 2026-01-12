@@ -12,7 +12,7 @@ from ..catalog.products_category.schemas import ProductCategoryRead
 
 
 class ProductBase(BaseModel):
-    title: str = Field(default=None)
+    title: str | None = Field(default=None)
     price: int = 0
     description: Optional[str] = None
     image: Optional[str] = None
