@@ -1,28 +1,33 @@
+from app.core.exceptions import InternalServerErrorException, NotFoundException
+
 from .models import Product
-from .schemas import ProductCreate, ProductUpdate
 from .repository import ProductRepository
-from app.core.exceptions import NotFoundException, InternalServerErrorException
+from .schemas import ProductCreate, ProductUpdate
+
 
 class ProductService:
-    no_product:str = "Product doesn't exits"
-    
+    no_product: str = "Product doesn't exits"
+
     def __init__(self, repository: ProductRepository):
         self.repository = repository
 
     # CREATE
     # ----------------------
     def create_product(self, item_data: ProductCreate):
-
         # Validate Category
         if not self.repository.check_category_exists(item_data.category_id):
-             raise NotFoundException(detail=f"Category Id:{item_data.category_id} doesn't exist")
-            
+            raise NotFoundException(
+                detail=f"Category Id:{item_data.category_id} doesn't exist"
+            )
+
         product_db = Product.model_validate(item_data.model_dump())
-        
+
         try:
             return self.repository.create(product_db)
-        except Exception:
-            raise InternalServerErrorException(detail="Internal Server error, create Product")
+        except Exception as e:
+            raise InternalServerErrorException(
+                detail="Internal Server error, create Product"
+            ) from e
 
     # GET ONE
     # ----------------------
@@ -38,9 +43,9 @@ class ProductService:
     def update_product(self, item_id: int, item_data: ProductUpdate):
         item_data_dict = item_data.model_dump(exclude_unset=True)
         updated_product = self.repository.update(item_id, item_data_dict)
-        
+
         if not updated_product:
-             raise NotFoundException(detail=self.no_product)
+            raise NotFoundException(detail=self.no_product)
         return updated_product
 
     # GET ALL PLANS

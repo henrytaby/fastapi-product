@@ -1,24 +1,38 @@
 from fastapi.testclient import TestClient
 
+
 def test_create_task(client: TestClient):
     response = client.post(
         "/api/tasks/",
-        json={"title": "Test Task", "description": "This is a test task", "completed": False}
+        json={
+            "title": "Test Task",
+            "description": "This is a test task",
+            "completed": False,
+        },
     )
     assert response.status_code == 201
     data = response.json()
     assert data["title"] == "Test Task"
     assert "id" in data
 
+
 def test_read_tasks(client: TestClient):
     # Create a task first
     client.post(
         "/api/tasks/",
-        json={"title": "Task 1", "description": "Task 1 description", "completed": False}
+        json={
+            "title": "Task 1",
+            "description": "Task 1 description",
+            "completed": False,
+        },
     )
     client.post(
         "/api/tasks/",
-        json={"title": "Task 2", "description": "Task 2 description", "completed": True}
+        json={
+            "title": "Task 2",
+            "description": "Task 2 description",
+            "completed": True,
+        },
     )
 
     response = client.get("/api/tasks/")
@@ -26,10 +40,11 @@ def test_read_tasks(client: TestClient):
     data = response.json()
     assert len(data) >= 2
 
+
 def test_read_task(client: TestClient):
     response = client.post(
         "/api/tasks/",
-        json={"title": "Test Task", "description": "Desc", "completed": False}
+        json={"title": "Test Task", "description": "Desc", "completed": False},
     )
     task_id = response.json()["id"]
 
@@ -38,6 +53,7 @@ def test_read_task(client: TestClient):
     data = response.json()
     assert data["title"] == "Test Task"
     assert data["id"] == task_id
+
 
 def test_read_task_not_found(client: TestClient):
     response = client.get("/api/tasks/999999")

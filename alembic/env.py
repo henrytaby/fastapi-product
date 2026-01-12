@@ -1,7 +1,6 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 from alembic import context
@@ -10,12 +9,6 @@ from alembic import context
 from app.core.config import settings
 
 # Import all models so SQLModel.metadata is populated
-from app.modules.tasks import models as tasks_models
-from app.modules.products import models as products_models
-from app.modules.customers import models as customers_models
-from app.modules.catalog.products_category import models as category_models
-from app.modules.catalog.products_brand import models as brand_models
-from app.models.user import User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -77,9 +70,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

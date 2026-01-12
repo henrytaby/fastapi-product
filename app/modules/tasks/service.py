@@ -1,11 +1,13 @@
-from .models import Task
-from .schemas import TaskCreate, TaskUpdate
-from .repository import TaskRepository
 from app.core.exceptions import NotFoundException
 
+from .models import Task
+from .repository import TaskRepository
+from .schemas import TaskCreate, TaskUpdate
+
+
 class TaskService:
-    no_task:str = "Task not found"
-    
+    no_task: str = "Task not found"
+
     def __init__(self, repository: TaskRepository):
         self.repository = repository
 
@@ -28,16 +30,16 @@ class TaskService:
     def update_task(self, item_id: int, item_data: TaskUpdate):
         item_data_dict = item_data.model_dump(exclude_unset=True)
         updated_task = self.repository.update(item_id, item_data_dict)
-        
+
         if not updated_task:
-             raise NotFoundException(detail=self.no_task)
+            raise NotFoundException(detail=self.no_task)
         return updated_task
 
     # GET ALL PLANS
     # ----------------------
     def get_tasks(self, offset: int = 0, limit: int = 100):
         return self.repository.get_all(offset, limit)
-        
+
     # DELETE
     # ----------------------
     def delete_task(self, item_id: int):

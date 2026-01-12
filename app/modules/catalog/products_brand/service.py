@@ -1,11 +1,13 @@
-from .models import ProductBrand
-from .schemas import ProductBrandCreate, ProductBrandUpdate
-from .repository import ProductBrandRepository
 from app.core.exceptions import NotFoundException
 
+from .models import ProductBrand
+from .repository import ProductBrandRepository
+from .schemas import ProductBrandCreate, ProductBrandUpdate
+
+
 class ProductBrandService:
-    no_task:str = "Brand doesn't exits"
-    
+    no_task: str = "Brand doesn't exits"
+
     def __init__(self, repository: ProductBrandRepository):
         self.repository = repository
 
@@ -28,9 +30,9 @@ class ProductBrandService:
     def update_product_brand(self, item_id: int, item_data: ProductBrandUpdate):
         item_data_dict = item_data.model_dump(exclude_unset=True)
         updated_item = self.repository.update(item_id, item_data_dict)
-        
+
         if not updated_item:
-             raise NotFoundException(detail=self.no_task)
+            raise NotFoundException(detail=self.no_task)
         return updated_item
 
     # GET ALL PLANS

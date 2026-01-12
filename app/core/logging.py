@@ -1,13 +1,14 @@
 import logging
 import sys
+
 import structlog
-from typing import Any, Dict
+
 
 def configure_logging():
     """
     Configures structlog and standard logging.
     """
-    
+
     # Processors applied to all loggers
     shared_processors = [
         structlog.contextvars.merge_contextvars,
@@ -21,7 +22,8 @@ def configure_logging():
 
     # Structlog configuration
     structlog.configure(
-        processors=shared_processors + [
+        processors=shared_processors
+        + [
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
         logger_factory=structlog.stdlib.LoggerFactory(),

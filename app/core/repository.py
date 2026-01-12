@@ -1,7 +1,9 @@
-from typing import Generic, TypeVar, Type, List, Optional
-from sqlmodel import SQLModel, Session, select
+from typing import Generic, List, Optional, Type, TypeVar
+
+from sqlmodel import Session, SQLModel, select
 
 ModelType = TypeVar("ModelType", bound=SQLModel)
+
 
 class BaseRepository(Generic[ModelType]):
     def __init__(self, session: Session, model: Type[ModelType]):
@@ -25,10 +27,10 @@ class BaseRepository(Generic[ModelType]):
         db_obj = self.get_by_id(id)
         if not db_obj:
             return None
-        
+
         for key, value in obj_data.items():
             setattr(db_obj, key, value)
-            
+
         self.session.add(db_obj)
         self.session.commit()
         self.session.refresh(db_obj)
@@ -38,7 +40,7 @@ class BaseRepository(Generic[ModelType]):
         db_obj = self.get_by_id(id)
         if not db_obj:
             return False
-        
+
         self.session.delete(db_obj)
         self.session.commit()
         return True

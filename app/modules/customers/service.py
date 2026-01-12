@@ -1,11 +1,13 @@
-from .models import Customer
-from .schemas import CustomerCreate, CustomerUpdate
-from .repository import CustomerRepository
 from app.core.exceptions import NotFoundException
 
+from .models import Customer
+from .repository import CustomerRepository
+from .schemas import CustomerCreate, CustomerUpdate
+
+
 class CustomerService:
-    no_task:str = "Customer doesn't exits"
-    
+    no_task: str = "Customer doesn't exits"
+
     def __init__(self, repository: CustomerRepository):
         self.repository = repository
 
@@ -28,9 +30,9 @@ class CustomerService:
     def update_customer(self, item_id: int, item_data: CustomerUpdate):
         item_data_dict = item_data.model_dump(exclude_unset=True)
         updated_item = self.repository.update(item_id, item_data_dict)
-        
+
         if not updated_item:
-             raise NotFoundException(detail=self.no_task)
+            raise NotFoundException(detail=self.no_task)
         return updated_item
 
     # GET ALL PLANS

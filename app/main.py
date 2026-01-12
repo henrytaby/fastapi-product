@@ -1,12 +1,28 @@
+import uuid
+
+import structlog
 import uvicorn
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.core.config import settings
 from app.core.db import create_db_and_tables
-from app.core.routers import router as api_router 
+from app.core.exceptions import (
+    BadRequestException,
+    InternalServerErrorException,
+    NotFoundException,
+)
+from app.core.handlers import (
+    bad_request_exception_handler,
+    internal_server_error_handler,
+    not_found_exception_handler,
+)
+from app.core.logging import configure_logging
+from app.core.routers import router as api_router
 
+# Setup Logging
+configure_logging()
 
 description = """
 API de un Sistema de tareas y productos, usando FastApi con Python.
@@ -41,17 +57,6 @@ app = FastAPI(
     ],
 )
 
-import uuid
-import structlog
-from fastapi import Request, Response
-
-from app.core.logging import configure_logging
-
-# Setup Logging
-configure_logging()
-
-# ... existing code ...
-
 # Habilitar CORS
 app.add_middleware(
     CORSMiddleware,
@@ -61,23 +66,22 @@ app.add_middleware(
     allow_headers=["*"],  # Permitir todos los encabezados
 )
 
+
 @app.middleware("http")
 async def logging_middleware(request: Request, call_next):
     request_id = str(uuid.uuid4())
     structlog.contextvars.clear_contextvars()
     structlog.contextvars.bind_contextvars(request_id=request_id)
-    
+
     response = await call_next(request)
     return response
 
-#version_prefix = f"/api/{version}"
+
+# version_prefix = f"/api/{version}"
 version_prefix = "/api"
 # Incluir el router principal
 app.include_router(api_router, prefix=version_prefix)
 
-# Exception Handlers
-from app.core.exceptions import NotFoundException, BadRequestException, InternalServerErrorException
-from app.core.handlers import not_found_exception_handler, bad_request_exception_handler, internal_server_error_handler
 
 app.add_exception_handler(NotFoundException, not_found_exception_handler)
 app.add_exception_handler(BadRequestException, bad_request_exception_handler)
@@ -87,6 +91,7 @@ app.add_exception_handler(InternalServerErrorException, internal_server_error_ha
 @app.get("/")
 async def read_items():
     return FileResponse("./app/index.html")
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=settings.PORT)

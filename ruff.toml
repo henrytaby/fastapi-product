@@ -9,7 +9,7 @@ select = [
     "I",  # isort
     "B",  # flake8-bugbear
 ]
-ignore = []
+ignore = ["B008"]
 
 [format]
 quote-style = "double"

@@ -1,11 +1,13 @@
-from .models import ProductCategory
-from .schemas import ProductCategoryCreate, ProductCategoryUpdate
-from .repository import ProductCategoryRepository
 from app.core.exceptions import NotFoundException
 
+from .models import ProductCategory
+from .repository import ProductCategoryRepository
+from .schemas import ProductCategoryCreate, ProductCategoryUpdate
+
+
 class ProductCategoryService:
-    no_task:str = "Product doesn't exits"
-    
+    no_task: str = "Product doesn't exits"
+
     def __init__(self, repository: ProductCategoryRepository):
         self.repository = repository
 
@@ -28,9 +30,9 @@ class ProductCategoryService:
     def update_product_category(self, item_id: int, item_data: ProductCategoryUpdate):
         item_data_dict = item_data.model_dump(exclude_unset=True)
         updated_item = self.repository.update(item_id, item_data_dict)
-        
+
         if not updated_item:
-             raise NotFoundException(detail=self.no_task)
+            raise NotFoundException(detail=self.no_task)
         return updated_item
 
     # GET ALL PLANS
