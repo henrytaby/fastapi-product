@@ -20,7 +20,7 @@ El proyecto implementa una **Arquitectura Modular** apoyada en el **Patrón Repo
 graph LR
     A[Router] --> B[Service]
     B --> C[Repository]
-    C --> D[Database (SQLModel)]
+    C --> D["Database (SQLModel)"]
 ```
 
 ### Componentes Principales
