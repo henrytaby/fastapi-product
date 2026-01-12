@@ -41,6 +41,17 @@ app = FastAPI(
     ],
 )
 
+import uuid
+import structlog
+from fastapi import Request, Response
+
+from app.core.logging import configure_logging
+
+# Setup Logging
+configure_logging()
+
+# ... existing code ...
+
 # Habilitar CORS
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +60,15 @@ app.add_middleware(
     allow_methods=["*"],  # Permitir todos los métodos
     allow_headers=["*"],  # Permitir todos los encabezados
 )
+
+@app.middleware("http")
+async def logging_middleware(request: Request, call_next):
+    request_id = str(uuid.uuid4())
+    structlog.contextvars.clear_contextvars()
+    structlog.contextvars.bind_contextvars(request_id=request_id)
+    
+    response = await call_next(request)
+    return response
 
 #version_prefix = f"/api/{version}"
 version_prefix = "/api"
