@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from typing import Annotated
 from fastapi import Depends
 from sqlmodel import Session, create_engine, SQLModel
-from app.core.config import Config
+from app.core.config import settings
 
 # from ..models.module import Module, ModuleGroup
 # from ..models.role import Role, RoleModule
@@ -12,7 +12,7 @@ from app.core.config import Config
 Docs about this implementation
 https://fastapi.tiangolo.com/tutorial/sql-databases/#run-the-app
 '''
-engine = create_engine(Config.DATABASE_URL, echo = False)
+engine = create_engine(settings.DATABASE_URL, echo = False)
 
 def create_db_and_tables(app: FastAPI):
     SQLModel.metadata.create_all(engine)

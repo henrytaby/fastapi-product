@@ -7,12 +7,12 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.models.user import User, UserRevokedToken
 from app.core.db import SessionDep
-from app.core.config import Config
+from app.core.config import settings
 
-SECRET_KEY = Config.SECRET_KEY
-ALGORITHM = Config.ALGORITHM
-ACCESS_TOKEN_EXPIRE_MINUTES = Config.ACCESS_TOKEN_EXPIRE_MINUTES
-REFRESH_TOKEN_EXPIRE_DAYS = Config.REFRESH_TOKEN_EXPIRE_DAYS
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+REFRESH_TOKEN_EXPIRE_DAYS = settings.REFRESH_TOKEN_EXPIRE_DAYS
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
