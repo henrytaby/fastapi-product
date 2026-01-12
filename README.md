@@ -61,7 +61,7 @@ Uso de `pydantic-settings` para cargar y validar variables de entorno desde `.en
 ## Instalación y Configuración
 
 ### 1. Requisitos Previos
-*   Python 3.9+
+*   Python 3.10+
 *   PostgreSQL
 *   Git
 
@@ -194,6 +194,10 @@ from app.core.exceptions import NotFoundException, BadRequestException
 if not user:
     raise NotFoundException(detail="Usuario no encontrado")
 ```
+
+### 11. Documentación para Desarrolladores
+¿Quieres crear un nuevo módulo? Sigue nuestra receta paso a paso:
+👉 **[Lee el Manual del Desarrollador](docs/MANUAL_DESARROLLADOR.md)**
 
 ## Ejecución
 
