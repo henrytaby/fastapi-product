@@ -1,128 +1,121 @@
-# FastAPI
-## Product and Task system
+# FastAPI Product & Task Management API
 
-Es un API de un Sistema de tareas, usando FastApi con Python.
-El siguiente sistema de transacciones contiene:
+API RESTful construida con FastAPI para la gestión de productos, tareas, categorías y marcas.
 
-- Tareas
+## Descripción
 
+Este proyecto es una API modular diseñada con buenas prácticas de ingeniería de software, enfocada en la escalabilidad y mantenibilidad. Permite gestionar:
 
-## BASE DE DATOS
+*   **Tareas**: Control básico de tareas.
+*   **Productos**: Gestión de inventario con relaciones a categorías y marcas.
+*   **Clientes**: Administración de usuarios/clientes.
+*   **Catálogo**: Gestión centralizada de Categorías y Marcas.
 
-Es necesario realizar la creación de la base de datos llamada 
-"fastapi_product". Para crear ingresamos por terminal y ejecutamos los siguientes comandos
+## Arquitectura
 
-```
-tuusuario:$ sudo su postgres
-postgres:$ createdb fastapi_product
-postgres:$ exit
-```
+El proyecto implementa una **Arquitectura Modular** apoyada en el **Patrón Repositorio**.
 
-Para poder borrar una base de datos existente, utilizaremos el siguiente comando
-```
-tuusuario:$ sudo su postgres
-postgres:$ dropdb fastapi_product
-postgres:$ exit
+### Diagrama de Flujo de Datos
+```mermaid
+graph LR
+    A[Router] --> B[Service]
+    B --> C[Repository]
+    C --> D[Database (SQLModel)]
 ```
 
-## Instalación
-CLONAR EL PROYECTO
-Iniciamos con la clonación del proyecto, en la carpeta que utilice para desarrollo
-```
-$ git clone git@github.com:henrytaby/fastapi-product.git
-```
-INGRESAR AL PROYECTO
+### Componentes Principales
 
-Ingresamos a la carpeta del proyecto
-```
-tuusuario:$ cd fastapi-product
-```
-Abrimos Visual Studio Code en el proyecto
+#### 1. Estructura Modular (`app/modules/`)
+El código se organiza por dominios de negocio en lugar de capas técnicas. Cada módulo (`tasks`, `products`, etc.) contiene todo lo necesario para su funcionamiento:
+*   `routers.py`: Definición de endpoints.
+*   `service.py`: Lógica de negocio.
+*   `repository.py`: Acceso a datos.
+*   `models.py`: Definición de tablas.
+*   `schemas.py`: Validación de entrada/salida (Pydantic).
 
-```
-tuusuario:/fastapi-product/$ code .
-```
-En Visual Studio Code, ingresamos a la terminal.
+#### 2. Patrón Repositorio (`app/core/repository.py`)
+Se utiliza para desacoplar la lógica de negocio de la capa de acceso a datos.
+*   **`BaseRepository`**: Clase genérica que provee métodos CRUD estándar (`create`, `get_by_id`, `update`, `delete`) para cualquier modelo.
+*   **Repositorios Específicos**: (Ej: `ProductRepository`) Extienden el base para consultas complejas, como carga de relaciones o validaciones específicas.
 
-CREANDO ENTORNO VIRTUAL
+#### 3. Inyección de Dependencias
+FastAPI `Depends` se utiliza para gestionar el ciclo de vida de los componentes:
+*   `get_session` inyecta la sesión de DB.
+*   El `Repository` se inyecta en el `Service`.
+*   El `Service` se inyecta en el `Router`.
 
-Ahora que tenemos el proyecto en nuestra máquina local, debemos inicializar un entorno virtual de python con el siguiente comando:
-```
-tuusuario:/fastapi-product/$ python3 -m venv env
-```
-ACTIVANDO EL ENTORNO VIRTUAL
+#### 4. Manejo Centralizado de Excepciones (`app/core/handlers.py`)
+El sistema captura excepciones de dominio (como `NotFoundException`) y las transforma automáticamente en respuestas JSON estandarizadas (HTTP 404, 400, 500), manteniendo limpios los servicios.
 
-Ahora que tenemos el entorno virtual de python, debemos activarlo con el siguiente comando:
-```
-tuusuario:/fastapi-product/$ source env/bin/activate
+#### 5. Configuración Tipada (`app/core/config.py`)
+Uso de `pydantic-settings` para cargar y validar variables de entorno desde `.env`.
+
+## Tecnologías
+
+*   **Python 3.10+**
+*   **FastAPI**: Framework web moderno y rápido.
+*   **SQLModel**: ORM que combina SQLAlchemy y Pydantic.
+*   **PostgreSQL**: Base de datos relacional.
+*   **Pydantic Settings**: Gestión de configuración.
+
+## Instalación y Configuración
+
+### 1. Requisitos Previos
+*   Python 3.9+
+*   PostgreSQL
+*   Git
+
+### 2. Clonar el repositorio
+```bash
+git clone git@github.com:henrytaby/fastapi-product.git
+cd fastapi-product
 ```
 
-Se darán cuenta que esta activado el entorno virtual de python cuando vean al inicio de la línea de comando “(env)”, esto significa que tu terminal ya está corriendo en un entorno virtual.
-
-INSTALACIÓN DE LIBRERÍAS NECESARIAS DE PYTHON
-
-Para realizar la ejecución de la aplicación y después de haber creado el entorno virtual de python, es necesario realizar la instalación de librerías necesarias.
-```
-tuusuario:/fastapi-product/$ pip install -r requirements.txt
+### 3. Crear entorno virtual
+```bash
+python3 -m venv env
+source env/bin/activate
 ```
 
-CONFIGURACIÓN DE CONEXIÓN A LA BASE DE DATOS
-
-Ya contamos con la base de datos creada, y procedemos a crear el archivo ".env", que contiene la configuración de la base de datos. 
-
+### 4. Instalar dependencias
+```bash
+pip install -r requirements.txt
 ```
-tuusuario:/fastapi-product/$ cp .env.example .env
-```
-Editaremos el archivo .env creado y cambiaremos el valor de "DATABASE_URL"
 
+### 5. Configurar Base de Datos
+Crear la base de datos en PostgreSQL:
+```bash
+sudo su postgres
+createdb fastapi_product
+exit
 ```
+
+Configurar variables de entorno:
+```bash
+cp .env.example .env
+```
+Editar `.env` con tus credenciales:
+```env
 DATABASE_URL="postgresql://user:password@localhost/fastapi_product"
-SECRET_KEY=XXXXXXX
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-REFRESH_TOKEN_EXPIRE_DAYS=7
-TIME_ZONE=-4
-```
-Tendrá generar un "SECRET_KEY"
-
-## Crear y Poblar la base de datos
-
-```
-tuusuario:/fastapi-product/$ PYTHONPATH=/opt/uab/fastapi-product python3 seeds/seed_create_app.py
+SECRET_KEY=tu_clave_secreta_generada
+...
 ```
 
-## Ejecutar en modo desarrollo
-
-Ya que tenemos todo configurado, realizamos la ejecución en modo desarrollo de nuestro API
+### 6. Inicializar Datos (Seeds)
+```bash
+PYTHONPATH=. python3 seeds/seed_create_app.py
 ```
+
+## Ejecución
+
+Modo desarrollo (con hot-reload):
+```bash
 fastapi dev app/main.py
 ```
-## INGRESAR
 
-El sistema correrá en el puerto 8000 por defecto.
+La API estará disponible en: `http://localhost:8000`
+Documentación interactiva: `http://localhost:8000/docs`
 
-Para probar también puede ingresar a la documentación con Swagger generado por FastAPI, en la siguiente dirección.
-
-http://localhost:8000/docs
-
-Para poder visualizar la documentación puedes ingresar a
-
-http://localhost:8000/redoc 
-
-## BIBLIOGRAFÍA
-- https://fastapi.tiangolo.com
-- https://fastapi.tiangolo.com/es/tutorial/first-steps/
-- https://sqlmodel.tiangolo.com/
-- https://sqlmodel.tiangolo.com/tutorial/
-- https://docs.pydantic.dev/latest/
-- https://docs.pydantic.dev/latest/api/pydantic_settings/
-- https://docs.sqlalchemy.org/
-- https://docs.sqlalchemy.org/en/20/
-- https://www.uvicorn.org/
-- https://restfulapi.net/
-- https://learn.openapis.org/
-
-
-## License
+## Licencia
 
 MIT
