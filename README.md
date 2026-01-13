@@ -202,6 +202,7 @@ if not user:
 1.  **[Manual del Desarrollador (Creación de Módulos)](docs/DEVELOPER_GUIDE.md)**
 2.  **[Guía de Autenticación y Seguridad](docs/AUTHENTICATION_GUIDE.md)**
 3.  **[Guía de Testing Automatizado](docs/TESTING_GUIDE.md)**
+4.  **[Guía de Manejo de Excepciones](docs/EXCEPTION_HANDLING_GUIDE.md)**
 
 ## Ejecución
 
