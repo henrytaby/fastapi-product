@@ -15,11 +15,14 @@ from app.util.datetime import get_current_time
 
 
 class AuthService:
+    def __init__(self, session: SessionDep):
+        self.session = session
+
     # CREATE USER
     # ----------------------
-    def create_user(self, user: schemas.UserCreate, db: SessionDep):
+    def create_user(self, user: schemas.UserCreate):
         query = select(User).where(User.username == user.username)
-        db_user = db.exec(query).first()
+        db_user = self.session.exec(query).first()
         if db_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -31,21 +34,23 @@ class AuthService:
         del user_data_dict["password"]
         user_data_dict["password_hash"] = hashed_password
         new_user = User(**user_data_dict)
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+        new_user = User(**user_data_dict)
+        self.session.add(new_user)
+        self.session.commit()
+        self.session.refresh(new_user)
         return new_user
 
     def login_for_access_token(
         self,
-        db: SessionDep,
         form_data: OAuth2PasswordRequestForm,
         request: Request,
     ):
         ip_address = request.client.host if request and request.client else "unknown"
         user_agent = request.headers.get("user-agent") if request else "unknown"
 
-        user = utils.authenticate_user(db, form_data.username, form_data.password)
+        user = utils.authenticate_user(
+            self.session, form_data.username, form_data.password
+        )
         if not user:
             # Log the failed login attempt
             log = UserLogLogin(
@@ -58,8 +63,9 @@ class AuthService:
                 host_info=user_agent,
                 is_successful=False,
             )
-            db.add(log)
-            db.commit()
+
+            self.session.add(log)
+            self.session.commit()
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
@@ -96,15 +102,16 @@ class AuthService:
             host_info=user_agent,
             is_successful=True,
         )
-        db.add(log)
-        db.commit()
+
+        self.session.add(log)
+        self.session.commit()
         return {
             "access_token": access_token,
             "token_type": "bearer",
             "refresh_token": refresh_token,
         }
 
-    def refresh_access_token(self, db: SessionDep, refresh_token: str):
+    def refresh_access_token(self, refresh_token: str):
         try:
             payload = utils.decode_token(refresh_token)
             username: str = payload.get("sub")
@@ -118,7 +125,7 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
             ) from None
 
-        user = utils.get_user(db, username)
+        user = utils.get_user(self.session, username)
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
@@ -128,7 +135,7 @@ class AuthService:
         query_revoked = select(UserRevokedToken).where(
             UserRevokedToken.token == refresh_token
         )
-        revoked_token = db.exec(query_revoked).first()
+        revoked_token = self.session.exec(query_revoked).first()
         if revoked_token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -139,8 +146,8 @@ class AuthService:
         # Using 0 as user_id temporarily, or accurate user_id if we want
         # stricter validation earlier used_id for the record.
         new_revoked_token = UserRevokedToken(token=refresh_token, user_id=user.id)
-        db.add(new_revoked_token)
-        db.commit()
+        self.session.add(new_revoked_token)
+        self.session.commit()
 
         access_token_expires = timedelta(minutes=utils.ACCESS_TOKEN_EXPIRE_MINUTES)
         refresh_token_expires = timedelta(days=utils.REFRESH_TOKEN_EXPIRE_DAYS)
@@ -169,7 +176,7 @@ class AuthService:
             "refresh_token": new_refresh_token,
         }
 
-    def logout(self, db: SessionDep, token: str, refresh_token: str | None = None):
+    def logout(self, token: str, refresh_token: str | None = None):
         try:
             payload = utils.decode_token(token)
             user_id: int = payload.get("id")
@@ -184,35 +191,35 @@ class AuthService:
 
         # Check if the access token is already revoked
         query = select(UserRevokedToken).where(UserRevokedToken.token == token)
-        revoked_token = db.exec(query).first()
+        revoked_token = self.session.exec(query).first()
         if not revoked_token:
             revoked_token = UserRevokedToken(token=token, user_id=user_id)
-            db.add(revoked_token)
+            self.session.add(revoked_token)
 
         # Revoke Refresh Token if provided
         if refresh_token:
             query_rf = select(UserRevokedToken).where(
                 UserRevokedToken.token == refresh_token
             )
-            revoked_rf = db.exec(query_rf).first()
+            revoked_rf = self.session.exec(query_rf).first()
             if not revoked_rf:
                 revoked_rf = UserRevokedToken(token=refresh_token, user_id=user_id)
-                db.add(revoked_rf)
+                self.session.add(revoked_rf)
 
         # Update the log with logout time
         log_query = select(UserLogLogin).where(UserLogLogin.token == token)
-        log = db.exec(log_query).first()
+        log = self.session.exec(log_query).first()
         if log:
             log.logged_out_at = get_current_time()
-            db.add(log)
+            self.session.add(log)
 
-        db.commit()
+        self.session.commit()
 
-    def get_user_roles(self, user: User, db: SessionDep) -> list[RoleInfo]:
+    def get_user_roles(self, user: User) -> list[RoleInfo]:
         if user.is_superuser:
             # Superuser sees all active roles
             query = select(Role).where(Role.is_active).order_by(Role.sort_order)  # type: ignore
-            roles = db.exec(query).all()
+            roles = self.session.exec(query).all()
         else:
             # Normal user sees their assigned active roles
             # We filter by Role.is_active AND UserRole.is_active
@@ -225,13 +232,11 @@ class AuthService:
 
         return [RoleInfo(id=r.id, name=r.name, icon=r.icon) for r in roles]
 
-    def get_role_menu(
-        self, user: User, role_id: int, db: SessionDep
-    ) -> list[ModuleGroupMenu]:
+    def get_role_menu(self, user: User, role_id: int) -> list[ModuleGroupMenu]:
         # 1. Validate Access to Role
         target_role = None
         if user.is_superuser:
-            target_role = db.get(Role, role_id)
+            target_role = self.session.get(Role, role_id)
             if not target_role or not target_role.is_active:
                 raise HTTPException(
                     status_code=404, detail="Role not found or inactive"
