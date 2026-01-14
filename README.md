@@ -225,8 +225,8 @@ if not user:
 3.  **[Guía de Testing Automatizado](docs/TESTING_GUIDE.md)**
 4.  **[Guía de Manejo de Excepciones](docs/EXCEPTION_HANDLING_GUIDE.md)**
 5.  **[Guía de RBAC (Permisos)](docs/RBAC_GUIDE.md)**
-6.  **[Guía de Auditoría](docs/AUDIT_GUIDE.md)**
 7.  **[Guía de Alembic Migraciones](docs/ALEMBIC_GUIDE.md)**
+8.  **[Guía de Calidad de Código (Linting & Typing)](docs/QUALITY_GUIDE.md)**
 ## Ejecución
 
 Modo desarrollo (con hot-reload):

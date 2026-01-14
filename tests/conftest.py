@@ -19,14 +19,16 @@ def session_fixture():
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
     SQLModel.metadata.create_all(test_engine)
-    
+
     # Patch global engine
     from app.core import db
+
     db.engine = test_engine
-    
-    # Also register hooks manually here since lifespan might have run with old engine 
+
+    # Also register hooks manually here since lifespan might have run with old engine
     # (though hooks are on Session class, so it's fine)
     from app.core.audit_hooks import register_audit_hooks
+
     register_audit_hooks(test_engine)
 
     with Session(test_engine) as session:
@@ -46,9 +48,9 @@ def client_fixture(session: Session):
 
 @pytest.fixture(name="superuser")
 def superuser_fixture(session: Session):
-    from app.models.user import User
     from app.auth.utils import get_password_hash
-    
+    from app.models.user import User
+
     user = User(
         username="superuser",
         email="superuser@example.com",

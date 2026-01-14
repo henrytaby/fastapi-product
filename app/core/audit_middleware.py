@@ -1,11 +1,11 @@
 from fastapi import Request
-from starlette.middleware.base import BaseHTTPMiddleware
 from sqlmodel import Session
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.auth.utils import decode_token, oauth2_scheme
+from app.auth.utils import decode_token
+from app.core import db
 from app.core.audit import set_audit_context
 from app.core.config import settings
-from app.core import db
 from app.models.audit import AuditLog
 
 
@@ -28,14 +28,17 @@ class AuditMiddleware(BaseHTTPMiddleware):
             elif path.startswith(excluded):
                 return await call_next(request)
 
-        # 3. Process Request (We need to run this to get dependencies resolved like skip_audit)
-        # Note: Middleware runs BEFORE dependencies, so populating ContextVars here is tricky if we depend on deps.
+        # 3. Process Request (We need to run this to get dependencies
+        # resolved like skip_audit)
+        # Note: Middleware runs BEFORE dependencies, so populating ContextVars
+        # here is tricky if we depend on deps.
         # However, for JWT extraction we can do it manually here.
-        
-        # Extract User ID from Token (Manual decode to avoid interfering with Auth Dependencies)
+
+        # Extract User ID from Token (Manual decode to avoid interfering
+        # with Auth Dependencies)
         user_id = None
         username = "Anonymous"
-        
+
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
@@ -46,7 +49,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
                 username = payload.get("sub", "Unknown")
             except Exception:
                 pass  # Use anonymous if token is invalid
-        
+
         # Set ContextVars for Hooks
         ip_address = request.client.host if request.client else "unknown"
         user_agent = request.headers.get("user-agent")
@@ -58,8 +61,9 @@ class AuditMiddleware(BaseHTTPMiddleware):
         if hasattr(request.state, "skip_audit") and request.state.skip_audit:
             return response
 
-        # 5. Log Access (Async Fire & Forget ideally, but for now Synchronous or BackgroundTask)
-        # Since we are in middleware, we should be careful about blocking. 
+        # 5. Log Access (Async Fire & Forget ideally, but for now
+        # Synchronous or BackgroundTask)
+        # Since we are in middleware, we should be careful about blocking.
         # Writing to DB is fast enough for this scale.
         try:
             with Session(db.engine) as session:

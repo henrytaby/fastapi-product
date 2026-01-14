@@ -6,7 +6,9 @@ from fastapi import Request
 # ContextVar to store current user_id for logging/CDC
 audit_user_id_cv: ContextVar[Optional[int]] = ContextVar("audit_user_id", default=None)
 # ContextVar to store current username
-audit_username_cv: ContextVar[Optional[str]] = ContextVar("audit_username", default=None)
+audit_username_cv: ContextVar[Optional[str]] = ContextVar(
+    "audit_username", default=None
+)
 # ContextVar to store current IP address
 audit_ip_address_cv: ContextVar[Optional[str]] = ContextVar(
     "audit_ip_address", default=None
@@ -18,10 +20,10 @@ audit_user_agent_cv: ContextVar[Optional[str]] = ContextVar(
 
 
 def set_audit_context(
-    user_id: Optional[int], 
-    ip_address: Optional[str], 
+    user_id: Optional[int],
+    ip_address: Optional[str],
     username: Optional[str] = None,
-    user_agent: Optional[str] = None
+    user_agent: Optional[str] = None,
 ):
     """Set context variables for the current request"""
     audit_user_id_cv.set(user_id)

@@ -8,8 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html
 from fastapi.responses import FileResponse
 
+from app.core.audit_hooks import register_audit_hooks
+from app.core.audit_middleware import AuditMiddleware
 from app.core.config import settings
-from app.core.db import create_db_and_tables
+from app.core.db import create_db_and_tables, engine
 from app.core.exceptions import (
     BadRequestException,
     InternalServerErrorException,
@@ -22,9 +24,6 @@ from app.core.handlers import (
 )
 from app.core.logging import configure_logging
 from app.core.routers import router as api_router
-from app.core.audit_middleware import AuditMiddleware
-from app.core.audit_hooks import register_audit_hooks
-from app.core.db import engine
 
 # Setup Logging
 configure_logging()
@@ -36,6 +35,7 @@ Funciones;
 - Crear, Leer, Actualizar y eliminar Tareas
 """
 # ... existing imports ...
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

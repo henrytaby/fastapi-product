@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Optional, Any
+from typing import Any, Optional
 
-from sqlalchemy import Column, DateTime, JSON
+from sqlalchemy import JSON, Column, DateTime
 from sqlmodel import Field, SQLModel
 
 from app.util.datetime import get_current_time
