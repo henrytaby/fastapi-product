@@ -1,4 +1,5 @@
 import uuid
+from contextlib import asynccontextmanager
 
 import structlog
 import uvicorn
@@ -21,6 +22,9 @@ from app.core.handlers import (
 )
 from app.core.logging import configure_logging
 from app.core.routers import router as api_router
+from app.core.audit_middleware import AuditMiddleware
+from app.core.audit_hooks import register_audit_hooks
+from app.core.db import engine
 
 # Setup Logging
 configure_logging()
@@ -33,8 +37,15 @@ Funciones;
 """
 # ... existing imports ...
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    register_audit_hooks(engine)
+    yield
+
+
 app = FastAPI(
-    lifespan=create_db_and_tables,
+    lifespan=lifespan,
     title=settings.PROJECT_NAME,
     description=description,
     version=settings.VERSION,
@@ -59,6 +70,7 @@ app = FastAPI(
             "description": "Lista de Customers",
         },
     ],
+    openapi_url="/openapi.json",
 )
 
 # Habilitar CORS
@@ -69,6 +81,7 @@ app.add_middleware(
     allow_methods=["*"],  # Permitir todos los métodos
     allow_headers=["*"],  # Permitir todos los encabezados
 )
+app.add_middleware(AuditMiddleware)
 
 
 @app.middleware("http")

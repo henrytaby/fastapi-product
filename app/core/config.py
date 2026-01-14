@@ -24,6 +24,11 @@ class Settings(BaseSettings):
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
 
+    # Audit
+    ENABLE_ACCESS_AUDIT: bool = True
+    ENABLE_DATA_AUDIT: bool = True
+    AUDIT_EXCLUDED_PATHS: list[str] = ["/docs", "/redoc", "/openapi.json", "GET:/health"]
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

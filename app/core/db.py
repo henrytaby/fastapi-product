@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import Depends, FastAPI
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
 from app.core.config import settings
 
@@ -17,12 +17,8 @@ https://fastapi.tiangolo.com/tutorial/sql-databases/#run-the-app
 engine = create_engine(settings.DATABASE_URL, echo=False)
 
 
-@asynccontextmanager
-async def create_db_and_tables(app: FastAPI):
-    # SQLModel.metadata.create_all(engine)
-    # print(f"--[>] Server is starting ...")
-    yield
-    # print(f"--[x] Server has been stopped")
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
 
 
 def get_session():
