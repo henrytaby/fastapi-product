@@ -11,7 +11,7 @@ Este proyecto es una API modular diseñada con buenas prácticas de ingeniería 
 *   **Clientes**: Administración de usuarios/clientes.
 *   **Catálogo**: Gestión centralizada de Categorías y Marcas.
 *   **Seguridad**: Autenticación JWT robusta con **Rotación de Tokens**, Logout seguro (Blacklist) y Hashing de contraseñas.
-*   **Auditoría**: Sistema completo de registro de accesos y cambios de datos (CDC) con almacenamiento histórico.
+*   **Auditoría**: Sistema completo de registro de accesos y cambios de datos (CDC) con almacenamiento histórico. [Guía de Auditoría](docs/AUDIT_GUIDE.md).
 
 ## Arquitectura
 
