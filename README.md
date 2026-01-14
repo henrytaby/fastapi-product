@@ -11,7 +11,7 @@ Este proyecto es una API modular diseñada con buenas prácticas de ingeniería 
 *   **Clientes**: Administración de usuarios/clientes.
 *   **Catálogo**: Gestión centralizada de Categorías y Marcas.
 *   **Seguridad**: Autenticación JWT robusta con **Rotación de Tokens**, Logout seguro (Blacklist) y Hashing de contraseñas.
-*   **Auditoría**: Sistema completo de registro de accesos y cambios de datos (CDC) con almacenamiento histórico. [Guía de Auditoría](docs/AUDIT_GUIDE.md).
+*   **Auditoría**: Sistema completo de registro de accesos y cambios de datos (CDC) con almacenamiento histórico.
 
 ## Arquitectura
 
@@ -225,7 +225,8 @@ if not user:
 3.  **[Guía de Testing Automatizado](docs/TESTING_GUIDE.md)**
 4.  **[Guía de Manejo de Excepciones](docs/EXCEPTION_HANDLING_GUIDE.md)**
 5.  **[Guía de RBAC (Permisos)](docs/RBAC_GUIDE.md)**
-6.  **[Guía de Alembic Migraciones](docs/ALEMBIC_GUIDE.md)**
+6.  **[Guía de Auditoría](docs/AUDIT_GUIDE.md)**
+7.  **[Guía de Alembic Migraciones](docs/ALEMBIC_GUIDE.md)**
 ## Ejecución
 
 Modo desarrollo (con hot-reload):
