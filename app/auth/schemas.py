@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from sqlmodel import Field, SQLModel
 
@@ -45,3 +45,36 @@ class TokenData(SQLModel):
 
 class LogoutRequest(SQLModel):
     refresh_token: str
+
+
+# --- RBAC SCHEMAS ---
+
+class RoleInfo(SQLModel):
+    id: int
+    name: str
+    icon: Optional[str] = None
+
+
+class UserModulePermission(SQLModel):
+    module_slug: str
+    can_create: bool = False
+    can_update: bool = False
+    can_delete: bool = False
+    can_read: bool = False  # Derived/Implicit permission
+
+
+class ModuleMenu(SQLModel):
+    name: str
+    slug: str
+    route: Optional[str] = None
+    icon: Optional[str] = None
+    sort_order: Optional[int] = None
+    permissions: UserModulePermission
+
+
+class ModuleGroupMenu(SQLModel):
+    group_name: str
+    slug: str
+    icon: Optional[str] = None
+    sort_order: Optional[int] = None
+    modules: List[ModuleMenu]

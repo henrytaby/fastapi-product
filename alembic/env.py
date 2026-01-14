@@ -9,6 +9,10 @@ from alembic import context
 from app.core.config import settings
 
 # Import all models so SQLModel.metadata is populated
+from app.models.user import User, UserRevokedToken, UserLogLogin, UserRole
+from app.models.role import Role, RoleModule
+from app.models.module import Module, ModuleGroup
+from app.modules.tasks.models import Task
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

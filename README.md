@@ -102,15 +102,8 @@ SECRET_KEY=tu_clave_secreta_generada
 ...
 ```
 
-### 6. Migraciones de Base de Datos (Alembic)
-El proyecto utiliza **Alembic** para gestionar cambios en el esquema de la base de datos de forma segura.
-
-Generar una nueva migración (tras modificar un modelo):
-```bash
-alembic revision --autogenerate -m "Descripción del cambio"
-```
-
-Aplicar cambios pendientes a la BD:
+### 6. Inicializar Base de Datos (Crear Tablas)
+Una vez configurada la conexión en el `.env`, ejecuta las migraciones para crear todas las tablas:
 ```bash
 alembic upgrade head
 ```
@@ -144,6 +137,33 @@ El sistema utiliza `structlog` para generar logs en formato JSON (en producción
 # Los logs se mostrarán en la salida estándar (stdout)
 fastapi dev app/main.py
 ```
+
+### 11. Seguridad y RBAC (Control de Acceso)
+El sistema implementa un modelo de seguridad granular basado en **Roles** y **Módulos**:
+
+*   **Permisos por Módulo**: El acceso se define a nivel de módulo (ej: `tasks`, `products`) usando un identificador único (`slug`).
+*   **Permisos Agregados**: Un usuario puede tener múltiples roles. Sus permisos finales son la **suma** de todos los permisos de sus roles activos.
+*   **Superusuario**: Un usuario con `is_superuser=True` tiene acceso total al sistema, ignorando las reglas de RBAC.
+*   **Dependencia de Seguridad**: Se utiliza `PermissionChecker` para proteger endpoints:
+    ```python
+    # Ejemplo: Requerir permiso de CREAR en el módulo 'tasks'
+    Depends(PermissionChecker(module_slug="tasks", required_permission=PermissionAction.CREATE))
+    ```
+*   **Menús Dinámicos**: Endpoint `/me/menu/{role_id}` genera la estructura del menú frontend permitida para el rol seleccionado.
+
+Para detalles de implementación y recetas, ver la **[Guía de RBAC (Permisos)](docs/RBAC_GUIDE.md)**.
+
+### 12. Manejo de Base de Datos (Alembic)
+El proyecto utiliza **Alembic** para versionar la estructura de la base de datos.
+**Regla Crítica**: Todo nuevo modelo (tabla) debe ser importado en `alembic/env.py` para ser detectado.
+
+Flujo de Trabajo:
+1.  **Crear Modelo**: Definir clase SQLModel en `models.py`.
+2.  **Registrar**: Importar el modelo en `alembic/env.py`.
+3.  **Generar Migración**: `alembic revision --autogenerate -m "nombre_cambio"`.
+4.  **Aplicar**: `alembic upgrade head`.
+
+Si encuentras el error `UndefinedTable`, es porque el modelo no se registró antes de migrar. Ver **[Guía de Alembic Migraciones](docs/ALEMBIC_GUIDE.md)**.
 
 ## Guía de Uso para Desarrolladores
 
@@ -203,7 +223,8 @@ if not user:
 2.  **[Guía de Autenticación y Seguridad](docs/AUTHENTICATION_GUIDE.md)**
 3.  **[Guía de Testing Automatizado](docs/TESTING_GUIDE.md)**
 4.  **[Guía de Manejo de Excepciones](docs/EXCEPTION_HANDLING_GUIDE.md)**
-
+5.  **[Guía de RBAC (Permisos)](docs/RBAC_GUIDE.md)**
+6.  **[Guía de Alembic Migraciones](docs/ALEMBIC_GUIDE.md)**
 ## Ejecución
 
 Modo desarrollo (con hot-reload):
@@ -212,7 +233,7 @@ fastapi dev app/main.py
 ```
 
 La API estará disponible en: `http://localhost:8000`
-Documentación interactiva: `http://localhost:8000/docs`
+- **[API Documentation](http://localhost:8000/docs)**: Swagger UI for interactive API testing.
 
 ## Licencia
 

@@ -46,7 +46,7 @@ class Role(BaseModel, table=True):
     description: str | None = Field(default=None)
     is_active: bool = Field(default=True)
     icon: str | None = Field(default=None)
-    order: int | None = Field(default=None)
+    sort_order: int | None = Field(default=None)
 
     created_at: Optional[datetime] = Field(
         default_factory=get_current_time,

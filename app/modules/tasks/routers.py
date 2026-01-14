@@ -7,6 +7,8 @@ from .models import Task
 from .repository import TaskRepository
 from .schemas import TaskCreate, TaskUpdate
 from .service import TaskService
+from app.auth.permissions import PermissionChecker, PermissionAction
+from app.auth.schemas import UserModulePermission
 
 router = APIRouter()
 
@@ -20,7 +22,11 @@ def get_service(session: Session = Depends(get_session)):
 # ----------------------
 @router.post("/", response_model=Task, status_code=status.HTTP_201_CREATED)
 async def create_task(
-    task_data: TaskCreate, service: TaskService = Depends(get_service)
+    task_data: TaskCreate,
+    service: TaskService = Depends(get_service),
+    _: UserModulePermission = Depends(
+        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.CREATE)
+    ),
 ):
     """
     Create a new task.
@@ -31,7 +37,13 @@ async def create_task(
 # GET ONE - Obtener una tarea por ID
 # ----------------------
 @router.get("/{task_id}", response_model=Task)
-async def get_task(task_id: int, service: TaskService = Depends(get_service)):
+async def get_task(
+    task_id: int,
+    service: TaskService = Depends(get_service),
+    _: UserModulePermission = Depends(
+        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.READ)
+    ),
+):
     """
     Get a task by ID.
     """
@@ -42,7 +54,12 @@ async def get_task(task_id: int, service: TaskService = Depends(get_service)):
 # ----------------------
 @router.patch("/{task_id}", response_model=Task, status_code=status.HTTP_201_CREATED)
 async def update_task(
-    task_id: int, task_data: TaskUpdate, service: TaskService = Depends(get_service)
+    task_id: int,
+    task_data: TaskUpdate,
+    service: TaskService = Depends(get_service),
+    _: UserModulePermission = Depends(
+        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.UPDATE)
+    ),
 ):
     """
     Update an existing task.
@@ -53,7 +70,12 @@ async def update_task(
 # GET ALL TASK - Obtener todas las tareas
 # ----------------------
 @router.get("/", response_model=list[Task])
-async def get_tasks(service: TaskService = Depends(get_service)):
+async def get_tasks(
+    service: TaskService = Depends(get_service),
+    _: UserModulePermission = Depends(
+        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.READ)
+    ),
+):
     """
     Get all tasks.
     """
@@ -63,7 +85,13 @@ async def get_tasks(service: TaskService = Depends(get_service)):
 # DELETE - Eliminar una tarea
 # ----------------------
 @router.delete("/{task_id}")
-async def delete_task(task_id: int, service: TaskService = Depends(get_service)):
+async def delete_task(
+    task_id: int,
+    service: TaskService = Depends(get_service),
+    _: UserModulePermission = Depends(
+        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.DELETE)
+    ),
+):
     """
     Delete a task by ID.
     """

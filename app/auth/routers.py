@@ -47,3 +47,25 @@ async def logout(
     refresh_token = logout_data.refresh_token if logout_data else None
     service.logout(db, token, refresh_token)
     return {"msg": "Successfully logged out"}
+
+
+@router.get("/me/roles", response_model=list[schemas.RoleInfo])
+async def read_users_roles(
+    db: SessionDep, current_user: schemas.User = Depends(utils.get_current_user)
+):
+    """
+    Get all active roles assigned to the current user (or all if superuser).
+    """
+    return service.get_user_roles(current_user, db)
+
+
+@router.get("/me/menu/{role_id}", response_model=list[schemas.ModuleGroupMenu])
+async def read_user_menu(
+    role_id: int,
+    db: SessionDep,
+    current_user: schemas.User = Depends(utils.get_current_user),
+):
+    """
+    Get the menu structure for a specific role.
+    """
+    return service.get_role_menu(current_user, role_id, db)

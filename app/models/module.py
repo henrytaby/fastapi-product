@@ -13,8 +13,9 @@ if TYPE_CHECKING:
 class ModuleGroup(BaseModel, table=True):
     __tablename__ = "module_group"
     name: str = Field(index=True, unique=True)
+    slug: str = Field(index=True, unique=True)
     description: str | None = Field(default=None)
-    order: int | None = Field(default=None)
+    sort_order: int | None = Field(default=None)
     icon: str | None = Field(default=None)
     is_active: bool = Field(default=True)
     created_at: Optional[datetime] = Field(
@@ -35,15 +36,12 @@ class ModuleGroup(BaseModel, table=True):
 
 class Module(BaseModel, table=True):
     name: str = Field(index=True, unique=True)
+    slug: str = Field(index=True, unique=True)
     description: str | None = Field(default=None)
-    can_create: bool = Field(default=False)
-    # can_read: bool = Field(default=False)
-    can_update: bool = Field(default=False)
-    can_delete: bool = Field(default=False)
     is_active: bool = Field(default=True)
     icon: str | None = Field(default=None)
     route: str | None = Field(default=None)
-    order: int | None = Field(default=None)
+    sort_order: int | None = Field(default=None)
 
     created_at: Optional[datetime] = Field(
         default_factory=get_current_time,
