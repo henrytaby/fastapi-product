@@ -6,14 +6,15 @@ from sqlalchemy.orm import Session
 # Or track generic SQLModel
 from sqlmodel import SQLModel
 
-from app.core.audit import (
+from app.core.config import settings
+from app.models.audit import AuditLog
+
+from .context import (
     get_audit_ip_address,
     get_audit_user_agent,
     get_audit_user_id,
     get_audit_username,
 )
-from app.core.config import settings
-from app.models.audit import AuditLog
 
 
 def register_audit_hooks(engine: Engine):

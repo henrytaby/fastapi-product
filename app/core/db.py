@@ -1,3 +1,4 @@
+import json
 from typing import Annotated
 
 from fastapi import Depends
@@ -13,7 +14,17 @@ from app.core.config import settings
 Docs about this implementation
 https://fastapi.tiangolo.com/tutorial/sql-databases/#run-the-app
 """
-engine = create_engine(settings.DATABASE_URL, echo=False)
+
+
+def json_serializer(obj):
+    return json.dumps(obj, ensure_ascii=False)
+
+
+engine = create_engine(
+    settings.DATABASE_URL,
+    echo=False,
+    json_serializer=json_serializer,
+)
 
 
 def create_db_and_tables():

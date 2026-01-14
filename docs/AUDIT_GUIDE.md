@@ -138,7 +138,7 @@ python scripts/archive_audit.py --days 30 --dir /mnt/backups/audit
 
 ### Problema: El usuario aparece como `N/A` o `None` en los Logs de Datos (Hooks)
 *   **Causa**: Los Hooks de SQLAlchemy corren en un nivel profundo del ORM y a veces pierden el contexto de la petición web, especialmente en tareas asíncronas o scripts fuera de FastAPI.
-*   **Solución**: El sistema usa `ContextVars` (`app/core/audit.py`) para propagar el usuario. Asegúrate de que la operación de escritura ocurra dentro del ciclo de vida de una petición (request) donde el `AuditMiddleware` haya corrido. Si es un script manual (como un seed), el usuario será `None` por diseño a menos que lo inyectes manualmente.
+*   **Solución**: El sistema usa `ContextVars` (en `app/core/audit/context.py`) para propagar el usuario. Asegúrate de que la operación de escritura ocurra dentro del ciclo de vida de una petición (request) donde el `AuditMiddleware` haya corrido. Si es un script manual (como un seed), el usuario será `None` por diseño a menos que lo inyectes manualmente.
 
 ### Problema: La base de datos está muy lenta
 *   **Causa**: La tabla `audit_log` tiene millones de registros.

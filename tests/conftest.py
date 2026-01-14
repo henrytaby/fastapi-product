@@ -27,7 +27,7 @@ def session_fixture():
 
     # Also register hooks manually here since lifespan might have run with old engine
     # (though hooks are on Session class, so it's fine)
-    from app.core.audit_hooks import register_audit_hooks
+    from app.core.audit import register_audit_hooks
 
     register_audit_hooks(test_engine)
 

@@ -8,8 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html
 from fastapi.responses import FileResponse
 
-from app.core.audit_hooks import register_audit_hooks
-from app.core.audit_middleware import AuditMiddleware
+from app.core.audit import AuditMiddleware, register_audit_hooks
 from app.core.config import settings
 from app.core.db import create_db_and_tables, engine
 from app.core.exceptions import (

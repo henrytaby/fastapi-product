@@ -4,9 +4,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.auth.utils import decode_token
 from app.core import db
-from app.core.audit import set_audit_context
 from app.core.config import settings
 from app.models.audit import AuditLog
+
+from .context import set_audit_context
 
 
 class AuditMiddleware(BaseHTTPMiddleware):
