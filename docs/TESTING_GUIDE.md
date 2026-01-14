@@ -30,6 +30,15 @@ El archivo `tests/conftest.py` es el corazón de nuestro sistema de pruebas. Con
     *   Crea una instancia de `TestClient(app)`.
     *   **Sobrescribe la dependencia de base de datos** (`app.dependency_overrides[get_session]`) para que la aplicación use la base de datos de prueba en lugar de PostgreSQL.
 
+3.  **`superuser`**:
+    *   Crea un usuario administrador en la base de datos de prueba (`username="superuser"`, `password="password"`).
+    *   Útil si necesitas relacionar datos con un usuario existente.
+
+4.  **`superuser_token_headers`**:
+    *   Realiza un login real contra el endpoint `/api/auth/token` usando el usuario `superuser`.
+    *   Devuelve un diccionario: `{"Authorization": "Bearer <token>"}`.
+    *   Este es el fixture que usarás en el 90% de los tests de endpoints protegidos.
+
 ---
 
 ## 🚀 Ejecución de Tests
@@ -105,45 +114,42 @@ def test_delete_product(client, session):
 
 Para probar endpoints protegidos, hay dos estrategias:
 
-### Estrategia A: Override de Auth (Recomendada para lógica de negocio)
-Simulamos que ya hay un usuario logueado sobrescribiendo la dependencia `get_current_user`.
+### Estrategia A: Usando el Fixture `superuser_token_headers` (Recomendada)
+Esta es la forma más rápida y limpia. El fixture `superuser_token_headers` ya realiza el login de un usuario con permisos de superadministrador y te devuelve el diccionario de headers listo para usar.
+
+```python
+def test_create_secure_item(client, superuser_token_headers):
+    response = client.post(
+        "/api/items/",
+        json={"name": "Secure Item"},
+        headers=superuser_token_headers  # <--- Inyectar headers aquí
+    )
+    assert response.status_code == 201
+```
+
+### Estrategia B: Override de Auth (Mocking)
+Útil si quieres probar roles específicos sin pasar por el login real o si quieres simular usuarios con permisos limitados.
 
 ```python
 from app.auth.utils import get_current_user
-from app.auth.schemas import User
+from app.models.user import User
 
-def test_protected_route(client, app): # Necesitas importar 'app' o usar fixture
+def test_protected_route_mock(client, app):
     # Usuario mock
-    mock_user = User(id=1, username="testuser", email="test@a.com", password_hash="x")
+    mock_user = User(id=1, username="testuser", is_superuser=True)
     
     # Sobrescribir dependencia
     app.dependency_overrides[get_current_user] = lambda: mock_user
 
     response = client.get("/api/users/me")
     assert response.status_code == 200
-    assert response.json()["username"] == "testuser"
     
-    # Limpiar override
+    # Limpiar
     app.dependency_overrides = {}
 ```
 
-### Estrategia B: Login Real (Recomendada para flujos de seguridad)
-Haces login real para obtener el token y lo envías en los headers.
-
-```python
-def test_login_flow(client):
-    # 1. Crear usuario en BD (fixture o setup manual)
-    # ... código para crear usuario ...
-
-    # 2. Login
-    login_res = client.post("/api/auth/token", data={"username": "u", "password": "p"})
-    token = login_res.json()["access_token"]
-
-    # 3. Petición protegida
-    headers = {"Authorization": f"Bearer {token}"}
-    response = client.get("/api/users/me", headers=headers)
-    assert response.status_code == 200
-```
+### Estrategia C: Login Real Manual
+Si necesitas probar el flujo de login explícitamente o loguearte con un usuario normal (no superuser), puedes usar el helper `get_authorization_headers` en `conftest.py` o hacerlo manualmente en el test.
 
 ---
 
