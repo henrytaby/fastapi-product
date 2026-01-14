@@ -1,14 +1,9 @@
 from enum import Enum
-from typing import List, Optional
 
 from fastapi import Depends, HTTPException, status
-from sqlmodel import Session, select
 
 from app.auth.schemas import UserModulePermission
 from app.auth.utils import get_current_user
-from app.core.db import get_session
-from app.models.module import Module
-from app.models.role import RoleModule
 from app.models.user import User
 
 
@@ -42,18 +37,24 @@ class PermissionChecker:
 
         # Iterate over user roles and aggregate permissions
         # user.user_roles -> role -> role_modules
-        
+
         # Note: We assume user.user_roles is available (lazy loaded)
         for user_role in user.user_roles:
-            if not user_role.is_active or not user_role.role.is_active:
+            if (
+                not user_role.is_active
+                or not user_role.role
+                or not user_role.role.is_active
+            ):
                 continue
-                
+
             role = user_role.role
             for role_module in role.role_modules:
                 # Check if this role_module corresponds to the requested module slug
                 # Use greedy loading or check module relationship
+                if not role_module.module:
+                    continue
+
                 if role_module.module.slug == self.module_slug:
-                    
                     # Check active status
                     if not role_module.is_active or not role_module.module.is_active:
                         continue
@@ -92,7 +93,10 @@ class PermissionChecker:
         if not is_allowed:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"You do not have '{self.required_permission}' permission for module '{self.module_slug}'",
+                detail=(
+                    f"You do not have '{self.required_permission}' "
+                    f"permission for module '{self.module_slug}'"
+                ),
             )
 
         return user_permissions

@@ -49,6 +49,7 @@ class LogoutRequest(SQLModel):
 
 # --- RBAC SCHEMAS ---
 
+
 class RoleInfo(SQLModel):
     id: int
     name: str

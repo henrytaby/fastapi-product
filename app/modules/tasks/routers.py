@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
+from app.auth.permissions import PermissionAction, PermissionChecker
+from app.auth.schemas import UserModulePermission
 from app.core.db import get_session
 
 from .models import Task
 from .repository import TaskRepository
 from .schemas import TaskCreate, TaskUpdate
 from .service import TaskService
-from app.auth.permissions import PermissionChecker, PermissionAction
-from app.auth.schemas import UserModulePermission
 
 router = APIRouter()
 
@@ -25,7 +25,9 @@ async def create_task(
     task_data: TaskCreate,
     service: TaskService = Depends(get_service),
     _: UserModulePermission = Depends(
-        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.CREATE)
+        PermissionChecker(
+            module_slug="tasks", required_permission=PermissionAction.CREATE
+        )
     ),
 ):
     """
@@ -41,7 +43,9 @@ async def get_task(
     task_id: int,
     service: TaskService = Depends(get_service),
     _: UserModulePermission = Depends(
-        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.READ)
+        PermissionChecker(
+            module_slug="tasks", required_permission=PermissionAction.READ
+        )
     ),
 ):
     """
@@ -58,7 +62,9 @@ async def update_task(
     task_data: TaskUpdate,
     service: TaskService = Depends(get_service),
     _: UserModulePermission = Depends(
-        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.UPDATE)
+        PermissionChecker(
+            module_slug="tasks", required_permission=PermissionAction.UPDATE
+        )
     ),
 ):
     """
@@ -73,7 +79,9 @@ async def update_task(
 async def get_tasks(
     service: TaskService = Depends(get_service),
     _: UserModulePermission = Depends(
-        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.READ)
+        PermissionChecker(
+            module_slug="tasks", required_permission=PermissionAction.READ
+        )
     ),
 ):
     """
@@ -89,7 +97,9 @@ async def delete_task(
     task_id: int,
     service: TaskService = Depends(get_service),
     _: UserModulePermission = Depends(
-        PermissionChecker(module_slug="tasks", required_permission=PermissionAction.DELETE)
+        PermissionChecker(
+            module_slug="tasks", required_permission=PermissionAction.DELETE
+        )
     ),
 ):
     """

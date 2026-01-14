@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.auth import schemas, utils
 from app.auth.service import AuthService
 from app.core.db import SessionDep
+from app.models.user import User as UserModel
 
 router = APIRouter()
 service = AuthService()
@@ -51,7 +52,7 @@ async def logout(
 
 @router.get("/me/roles", response_model=list[schemas.RoleInfo])
 async def read_users_roles(
-    db: SessionDep, current_user: schemas.User = Depends(utils.get_current_user)
+    db: SessionDep, current_user: UserModel = Depends(utils.get_current_user)
 ):
     """
     Get all active roles assigned to the current user (or all if superuser).
@@ -63,7 +64,7 @@ async def read_users_roles(
 async def read_user_menu(
     role_id: int,
     db: SessionDep,
-    current_user: schemas.User = Depends(utils.get_current_user),
+    current_user: UserModel = Depends(utils.get_current_user),
 ):
     """
     Get the menu structure for a specific role.
