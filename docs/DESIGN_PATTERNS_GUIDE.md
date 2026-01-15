@@ -9,11 +9,11 @@ El proyecto sigue una estructura de capas clásica, favoreciendo la separación 
 
 ```mermaid
 graph TD
-    Client[Cliente (Frontend)] --> Middleware[Middleware (Auth/Audit/Log)]
-    Middleware --> Router[Router (Controller)]
-    Router --> Service[Service (Business Logic)]
-    Service --> Repository[Repository (Data Access)]
-    Repository --> DB[(Database)]
+    Client["Cliente (Frontend)"] --> Middleware["Middleware (Auth/Audit/Log)"]
+    Middleware --> Router["Router (Controller)"]
+    Router --> Service["Service (Business Logic)"]
+    Service --> Repository["Repository (Data Access)"]
+    Repository --> DB[("Database")]
     
     subgraph "Core Core"
         Middleware
