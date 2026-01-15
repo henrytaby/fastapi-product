@@ -4,6 +4,19 @@ Esta guía describe el flujo de trabajo estándar para añadir una nueva funcion
 
 ## Flujo de Trabajo (Receta Paso a Paso)
 
+```mermaid
+flowchart TD
+    A[1. Modelo DB] --> B[2. Migración Alembic]
+    B --> C[3. Schema Pydantic]
+    C --> D[4. Repositorio]
+    D --> E[5. Servicio]
+    E --> F[6. Router + DI]
+    F --> G[7. Registrar Router]
+    G --> H[8. Tests]
+```
+
+> **Nota**: Para entender los fundamentos teóricos detrás de estos pasos, consulta la **[Guía de Patrones de Diseño](DESIGN_PATTERNS_GUIDE.md)** y la **[Guía SOLID](SOLID_GUIDE.md)**.
+
 ### 1. Definición del Modelo (Base de Datos)
 El primer paso es definir la entidad en la base de datos.
 **Archivo**: `app/modules/{nombre_modulo}/models.py`
