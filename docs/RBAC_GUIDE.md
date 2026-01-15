@@ -13,6 +13,33 @@ El sistema permite un control de permisos granular a nivel de **Módulo**. Utili
 *   **Grupos de Módulos**: Categorización para módulos en el menú del frontend.
 *   **RoleModule**: La tabla de enlace donde se definen los permisos (`can_create` (crear), `can_update` (actualizar), `can_delete` (eliminar)) para un par Rol-Módulo específico. **El acceso de lectura es implícito:** si existe un enlace Rol-Módulo y está activo, el usuario puede leer.
 
+### Diagrama Entidad-Relación (Simplificado)
+```mermaid
+erDiagram
+    User ||--o{ UserRole : has
+    Role ||--o{ UserRole : assigned_to
+    Role ||--o{ RoleModule : defines_access
+    Module ||--o{ RoleModule : target_resource
+    
+    User {
+        int id
+        string username
+    }
+    Role {
+        string name
+        bool is_active
+    }
+    RoleModule {
+        bool can_create
+        bool can_update
+        bool can_delete
+    }
+    Module {
+        string slug
+        string name
+    }
+```
+
 ### Lógica de Agregación
 Los permisos son **aditivos**. Si un usuario tiene el `Rol A` (permite Crear) y el `Rol B` (permite Eliminar) para el mismo módulo, el usuario tendrá permisos para **ambas** acciones: Crear y Eliminar.
 **Superusuarios** (`is_superuser=True`) evaden todas las comprobaciones y tienen acceso total.
@@ -24,6 +51,20 @@ Los permisos son **aditivos**. Si un usuario tiene el `Rol A` (permite Crear) y 
 ### 1. Protegiendo un Nuevo Endpoint
 Para proteger un endpoint, necesitas usar la dependencia `PermissionChecker`.
 Esta dependencia verifica si el usuario (o sus roles) tiene el nivel de acceso requerido para el módulo objetivo.
+
+```mermaid
+flowchart LR
+    A[Petición Entrante] --> B{¿Es Superuser?}
+    B -- Sí --> C[ACCESO TOTAL]
+    B -- No --> D{Iterar Roles Activos}
+    
+    D --> E{¿Rol tiene acceso al Módulo?}
+    E -- No --> F[Denegar (403)]
+    E -- Sí --> G{¿Permiso Acción (Create/Delete)?}
+    
+    G -- Sí --> H[ACCESO CONCEDIDO]
+    G -- No --> F
+```
 
 **Pasos:**
 1.  Importar `PermissionChecker` y `PermissionAction`.

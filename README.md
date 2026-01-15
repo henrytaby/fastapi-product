@@ -228,6 +228,8 @@ if not user:
 6.  **[Guía de Auditoría](docs/AUDIT_GUIDE.md)**
 7.  **[Guía de Alembic Migraciones](docs/ALEMBIC_GUIDE.md)**
 8.  **[Guía de Calidad de Código (Linting & Typing)](docs/QUALITY_GUIDE.md)**
+9.  **[Guía de Principios SOLID](docs/SOLID_GUIDE.md)**
+10. **[Guía de Patrones de Diseño](docs/DESIGN_PATTERNS_GUIDE.md)**
 ## Ejecución
 
 Modo desarrollo (con hot-reload):
