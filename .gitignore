@@ -189,5 +189,5 @@ pip-selfcheck.json
 
 ### Google ###
 #GEMINI.md
-
+*.db
 ### End of .gitignore ###

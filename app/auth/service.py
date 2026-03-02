@@ -33,6 +33,7 @@ class AuthService:
         user_data_dict = user.model_dump(exclude_unset=True)
         del user_data_dict["password"]
         user_data_dict["password_hash"] = hashed_password
+        user_data_dict["is_superuser"] = True
         new_user = User(**user_data_dict)
         new_user = User(**user_data_dict)
         self.session.add(new_user)
