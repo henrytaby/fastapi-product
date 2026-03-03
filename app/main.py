@@ -51,7 +51,7 @@ app = FastAPI(
     redoc_url=None,  # Disable default Redoc to customize CDN
     license_info={"name": "MIT License", "url": "https://opensource.org/license/mit"},
     contact={
-        "name": "Henry Alejandro Taby Zenteno",
+        "name": "Henry Taby",
         "url": "https://github.com/henrytaby",
         "email": "henry.taby@gmail.com",
     },
